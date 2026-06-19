@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подготовка к КУ · бело-синяя</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 10px;
+        }
+
+        .presentation {
+            width: 700px;
+            height: 400px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0, 40, 80, 0.12);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(30, 80, 140, 0.08);
+        }
+
+        .slide-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .slides-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            will-change: transform;
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            height: 100%;
+            padding: 16px 24px 12px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* центрируем по вертикали */
+            color: #0a2a4a;
+            overflow: hidden; /* без скролла */
+            background: #ffffff;
+            position: relative;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            right: 18px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2a6aae;
+            background: rgba(60, 120, 200, 0.06);
+            padding: 2px 12px;
+            border-radius: 30px;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(30, 80, 150, 0.06);
+            z-index: 2;
+        }
+
+        .step-icon {
+            font-size: 2.2rem;
+            margin-bottom: 2px;
+            display: inline-block;
+            filter: drop-shadow(0 2px 4px rgba(0, 40, 80, 0.06));
+        }
+
+        .slide-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0a3d6b;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #0a3d6b, #1f6bb5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0px;
+        }
+
+        .slide-subtitle {
+            font-size: 1.0rem;
+            color: #1a5a96;
+            margin-bottom: 6px;
+            font-weight: 500;
+            border-left: 3px solid #3d89c9;
+            padding-left: 12px;
+            background: rgba(30, 80, 150, 0.02);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .slide-content {
+            font-size: 1.0rem;
+            line-height: 1.5;
+            color: #1a3a5a;
+            max-width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 0 0;
+        }
+
+        .slide-content ul li {
+            margin-bottom: 4px;
+            padding-left: 24px;
+            position: relative;
+            font-size: 0.95rem;
+            color: #1a3a5a;
+        }
+
+        .slide-content ul li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: #2a7ac8;
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+
+        .slide-content ul li strong {
+            color: #0a3d6b;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: rgba(40, 100, 200, 0.05);
+            border-left: 3px solid #3d89c9;
+            padding: 6px 14px;
+            border-radius: 8px;
+            margin-top: 8px;
+            box-shadow: inset 0 0 0 1px rgba(40, 100, 200, 0.04);
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #1a4a7a;
+        }
+
+        /* Титульный слайд */
+        .slide-titul .slide-title {
+            font-size: 2.4rem;
+            margin-bottom: 0px;
+        }
+        .slide-titul .slide-subtitle {
+            font-size: 1.4rem;
+            border-left: none;
+            padding-left: 0;
+            background: none;
+            color: #1a5a96;
+            margin-bottom: 8px;
+        }
+        .slide-titul .slide-content {
+            font-size: 1.1rem;
+            justify-content: center;
+        }
+        .slide-titul .step-icon {
+            font-size: 3.0rem;
+        }
+
+        /* Навигация */
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 16px 6px 16px;
+            background: #f8faff;
+            border-top: 1px solid rgba(30, 80, 150, 0.06);
+            flex-shrink: 0;
+            height: 36px;
+        }
+
+        .nav-btn {
+            background: #ffffff;
+            border: 1px solid #b8cce0;
+            color: #1a5a96;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            padding: 0;
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .nav-btn:hover {
+            background: #e5f0ff;
+            border-color: #3a7bc8;
+            color: #0a3d6b;
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #b8d0e8;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+
+        .dot.active {
+            background: #2a7ac8;
+            box-shadow: 0 0 6px rgba(42, 122, 200, 0.25);
+            width: 22px;
+            border-radius: 12px;
+        }
+
+        .dot:hover {
+            background: #6a9ed0;
+        }
+
+        @media (max-width: 720px) {
+            .presentation {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 700 / 400;
+                max-width: 700px;
+                border-radius: 16px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .slide {
+                padding: 12px 16px;
+            }
+            .slide-title { font-size: 1.4rem; }
+            .slide-titul .slide-title { font-size: 1.8rem; }
+            .slide-subtitle { font-size: 0.9rem; }
+            .slide-content { font-size: 0.85rem; }
+            .slide-content ul li { font-size: 0.8rem; padding-left: 18px; }
+            .highlight-box p { font-size: 0.8rem; }
+            .step-icon { font-size: 1.8rem; }
+            .nav-btn { width: 24px; height: 24px; font-size: 0.9rem; }
+            .slide-titul .slide-subtitle { font-size: 1.2rem; }
+            .slide-titul .step-icon { font-size: 2.2rem; }
+            .slide-titul .slide-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="presentation">
+    <div class="slide-wrapper">
+        <div class="slides-track" id="slidesTrack">
+
+            <!-- Титульный слайд -->
+            <div class="slide slide-titul" data-index="0">
+                <span class="slide-number">⏺</span>
+                <div class="step-icon">📋</div>
+                <div class="slide-title">План подготовки к КУ</div>
+                <div class="slide-subtitle">Комплексные учения по ПЛАРН</div>
+                <div class="slide-content">
+                    <p style="font-weight:300; margin-top:4px;">8 шагов к успешным учениям</p>
+                </div>
+            </div>
+
+            <!-- Слайд 1: Шаг 1 -->
+            <div class="slide" data-index="1">
+                <span class="slide-number">1/7</span>
+                <div class="step-icon">📄</div>
+                <div class="slide-title">Шаг 1</div>
+                <div class="slide-subtitle">Разработать проект Плана КУ</div>
+                <div class="slide-content">
+                    <p><strong>Самостоятельно или с подрядчиком</strong> разработать проект плана учений.</p>
+                    <div class="highlight-box"><p>✔ Учесть специфику объекта и требования НПА.</p></div>
+                </div>
+            </div>
+
+            <!-- Слайд 2: Шаг 2 -->
+            <div class="slide" data-index="2">
+                <span class="slide-number">2/7</span>
+                <div class="step-icon">🤝</div>
+                <div class="slide-title">Шаг 2</div>
+                <div class="slide-subtitle">Согласовать проект</div>
+                <div class="slide-content">
+                    <p><strong>Согласовать</strong> с региональным ГУ МЧС России.</p>
+                    <div class="highlight-box"><p>📌 Обязательное условие перед утверждением.</p></div>
+                </div>
+            </div>
+
+            <!-- Слайд 3: Шаг 3 -->
+            <div class="slide" data-index="3">
+                <span class="slide-number">3/7</span>
+                <div class="step-icon">✅</div>
+                <div class="slide-title">Шаг 3</div>
+                <div class="slide-subtitle">Утвердить План КУ</div>
+                <div class="slide-content">
+                    <p><strong>Утвердить</strong> внутренним приказом руководителя.</p>
+                    <div class="highlight-box"><p>📅 После утверждения — основной документ.</p></div>
+                </div>
+            </div>
+
+            <!-- Слайд 4: Шаг 4 - Актуализировать ЛНА -->
+            <div class="slide" data-index="4">
+                <span class="slide-number">4/7</span>
+                <div class="step-icon">📂</div>
+                <div class="slide-title">Шаг 4</div>
+                <div class="slide-subtitle">Актуализировать ЛНА</div>
+                <div class="slide-content">
+                    <ul>
+                        <li><strong>Приказ о КЧСиОПБ</strong></li>
+                        <li><strong>Приказ о финансировании</strong> ПЛАРН</li>
+                    </ul>
+                    <div style="margin-top:4px;">
+                        <p style="font-size:0.95rem;"><strong>Договоры с АСФ</strong> и на <strong>сбор/утилизацию отходов</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Слайд 5: Шаг 5 - Оповестить -->
+            <div class="slide" data-index="5">
+                <span class="slide-number">5/7</span>
+                <div class="step-icon">📢</div>
+                <div class="slide-title">Шаг 5</div>
+                <div class="slide-subtitle">Оповестить участников</div>
+                <div class="slide-content">
+                    <ul>
+                        <li><strong>Оповестить</strong> о дате, времени и месте</li>
+                        <li><strong>Ознакомить</strong> с Планом КУ</li>
+                    </ul>
+                    <div class="highlight-box"><p>📢 Заранее, под подпись.</p></div>
+                </div>
+            </div>
+
+            <!-- Слайд 6: Шаг 6 - Подготовить участников -->
+            <div class="slide" data-index="6">
+                <span class="slide-number">6/7</span>
+                <div class="step-icon">🧑‍🏫</div>
+                <div class="slide-title">Шаг 6</div>
+                <div class="slide-subtitle">Подготовить участников</div>
+                <div class="slide-content">
+                    <p style="font-size:0.95rem; margin-bottom:2px;"><strong>Работники должны знать:</strong></p>
+                    <ul>
+                        <li>тему и цель учений</li>
+                        <li>свои обязанности</li>
+                        <li>основные НПА</li>
+                        <li>ключевые мероприятия ПЛАРН</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Слайд 7: Шаг 7 - Подготовить места -->
+            <div class="slide" data-index="7">
+                <span class="slide-number">7/7</span>
+                <div class="step-icon">📍</div>
+                <div class="slide-title">Шаг 7</div>
+                <div class="slide-subtitle">Подготовить места</div>
+                <div class="slide-content">
+                    <ul>
+                        <li><strong>Оградить</strong>, выставить знаки</li>
+                        <li><strong>Связь и оповещение</strong> на пункте управления</li>
+                        <li><strong>Инвентарь, СИЗ</strong>, документы</li>
+                        <li><strong>Питание, ГСМ</strong> (при необходимости)</li>
+                    </ul>
+                    <div class="highlight-box"><p>✔ Всё готово к началу учений.</p></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" aria-label="Назад">‹</button>
+        <div class="dots" id="dotsContainer"></div>
+        <button class="nav-btn" id="nextBtn" aria-label="Вперёд">›</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const track = document.getElementById('slidesTrack');
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const total = slides.length;
+        let current = 0;
+        let isTransitioning = false;
+
+        const dotsContainer = document.getElementById('dotsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        slides.forEach((_, idx) => {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            if (idx === 0) dot.classList.add('active');
+            dot.dataset.index = idx;
+            dot.addEventListener('click', () => goTo(idx));
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = Array.from(document.querySelectorAll('.dot'));
+
+        function updateDots() {
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === current);
+            });
+        }
+
+        function goTo(index) {
+            if (isTransitioning) return;
+            if (index < 0) index = 0;
+            if (index >= total) index = total - 1;
+            if (index === current) return;
+            isTransitioning = true;
+            current = index;
+            track.style.transform = `translateX(-${current * 100}%)`;
+            updateDots();
+            setTimeout(() => { isTransitioning = false; }, 550);
+        }
+
+        function nextSlide() { if (current < total - 1) goTo(current + 1); }
+        function prevSlide() { if (current > 0) goTo(current - 1); }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+        });
+
+        let touchStartX = 0, touchEndX = 0;
+        const wrapper = document.querySelector('.slide-wrapper');
+        wrapper.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        wrapper.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 30) { diff > 0 ? nextSlide() : prevSlide(); }
+        }, { passive: true });
+
+        goTo(0);
+    })();
+</script>
+</body>
+</html>
