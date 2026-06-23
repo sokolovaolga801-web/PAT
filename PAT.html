@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квест: Организация ПАТ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 700px;
+      height: 560px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+    }
+    .container::-webkit-scrollbar {
+      width: 4px;
+    }
+    .container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+      flex-wrap: nowrap;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #0b2a41;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+    }
+    .score-area {
+      background: #f1f5f9;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a4b6d;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 2px solid #dce3ec;
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+    .score-area .score-number {
+      font-size: 18px;
+      min-width: 22px;
+      text-align: center;
+    }
+    .score-area.pop {
+      transform: scale(1.08);
+      border-color: #22c55e;
+      background: #dcfce7;
+    }
+    .subhead {
+      color: #54738f;
+      font-size: 14px;
+      margin-bottom: 8px;
+      border-left: 3px solid #1a4b6d;
+      padding-left: 10px;
+      background: #f8fafc;
+      border-radius: 0 8px 8px 0;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      height: 2px;
+      background: #dce3ec;
+      z-index: 1;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      flex: 1;
+      cursor: default;
+    }
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #dce3ec;
+      color: #4a5a6e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      transition: 0.3s;
+      border: 2px solid transparent;
+      margin-bottom: 2px;
+    }
+    .step-circle.active {
+      background: #1a4b6d;
+      color: white;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+    .step-circle.done {
+      background: #22c55e;
+      color: white;
+      border-color: #22c55e;
+    }
+    .step-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: #4a5a6e;
+      text-align: center;
+      line-height: 1.1;
+      max-width: 44px;
+    }
+    .step-label.active {
+      color: #1a4b6d;
+    }
+    .step-label.done {
+      color: #22c55e;
+    }
+    .stage-panel {
+      background: #f9fcff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid #e9eef3;
+      margin-bottom: 8px;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 180px;
+    }
+    .stage-panel::-webkit-scrollbar {
+      width: 3px;
+    }
+    .stage-panel::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+    }
+    .stage-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0b2a41;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stage-desc {
+      color: #3f5a74;
+      font-size: 14px;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #dce3ec;
+      padding-bottom: 6px;
+    }
+    .task-area {
+      margin-top: 2px;
+    }
+    .task-area p {
+      font-weight: 500;
+      color: #1e3a5f;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .options-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 6px 0;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .option-item:hover:not(.disabled) {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+    .option-item input[type="radio"],
+    .option-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #1a4b6d;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .option-item label {
+      font-size: 14px;
+      cursor: pointer;
+      flex: 1;
+      color: #1e293b;
+    }
+    .option-item.correct {
+      border-color: #22c55e;
+      background: #dcfce7;
+    }
+    .option-item.wrong {
+      border-color: #ef4444;
+      background: #fee2e2;
+    }
+    .option-item.disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+    .option-item.disabled input {
+      cursor: default;
+    }
+    .option-item.disabled label {
+      cursor: default;
+    }
+    .dist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 6px 0;
+    }
+    .dist-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: white;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+      transition: 0.2s;
+      gap: 4px;
+    }
+    .dist-row .action-label {
+      font-weight: 500;
+      color: #1e293b;
+      flex: 1 1 120px;
+      font-size: 14px;
+    }
+    .dist-row .radio-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .dist-row .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #1e293b;
+    }
+    .dist-row .radio-group input[type="radio"] {
+      accent-color: #1a4b6d;
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+    .dist-row.disabled .radio-group label {
+      cursor: default;
+    }
+    .dist-row.disabled input {
+      cursor: default;
+    }
+    .dist-row.correct-row {
+      border-color: #22c55e;
+      background: #dcfce7;
+    }
+    .dist-row.wrong-row {
+      border-color: #ef4444;
+      background: #fee2e2;
+    }
+    .feedback-box {
+      margin-top: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+      border-left: 4px solid;
+      display: none;
+    }
+    .feedback-box.success {
+      display: block;
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #14532d;
+    }
+    .feedback-box.error {
+      display: block;
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #7f1d1d;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary,
+    .btn-reset {
+      flex: 0 1 auto;
+      min-width: 96px;
+      text-align: center;
+    }
+    .btn-primary {
+      background: #1a4b6d;
+      color: white;
+      box-shadow: 0 2px 4px rgba(26,75,109,0.2);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #0f3a54;
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-secondary {
+      background: #e9edf2;
+      color: #1e3a5f;
+      border: 1px solid #cbd5e1;
+      flex: 0 1 auto;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #dce3ec;
+    }
+    .btn-secondary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-reset {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-reset:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+    .btn-reset:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-buttons .btn {
+      flex: 0 1 auto;
+      font-size: 14px;
+    }
+    .result-box {
+      text-align: center;
+      padding: 10px 6px;
+    }
+    .result-box .big-emoji {
+      font-size: 44px;
+      margin-bottom: 4px;
+    }
+    .result-box .level {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0b2a41;
+    }
+    .result-box .sub {
+      font-size: 15px;
+      color: #3f5a74;
+      margin: 2px 0 8px;
+    }
+    .result-box .detail {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 300px;
+      margin: 6px auto;
+      color: #1e293b;
+      font-size: 14px;
+    }
+    .result-box .score-final {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1a4b6d;
+      margin-top: 4px;
+    }
+    .reset-all-btn {
+      background: #1a4b6d;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 8px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+    .reset-all-btn:hover {
+      background: #0f3a54;
+    }
+    .hidden {
+      display: none !important;
+    }
+    #stepCounter {
+      font-size: 14px;
+      color: #54738f;
+    }
+    @media (max-width: 720px) {
+      .container {
+        width: 100%;
+        height: 100vh;
+        max-height: 560px;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 10px 10px 12px;
+      }
+    }
+    @media (max-width: 480px) {
+      .btn-primary,
+      .btn-reset {
+        min-width: 76px;
+        padding: 5px 12px;
+        font-size: 13px;
+      }
+      .btn-group .btn {
+        flex: 1 1 100%;
+      }
+      .stage-panel {
+        padding: 8px 10px;
+      }
+      .option-item {
+        padding: 4px 10px;
+      }
+      .dist-row {
+        padding: 4px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="header">
+    <h1>🚀 Организация ПАТ</h1>
+    <div class="score-area" id="scoreArea">
+      <span>⭐</span>
+      <span class="score-number" id="scoreDisplay">0</span>
+      <span>баллов</span>
+    </div>
+  </div>
+  <div class="subhead">Интерактивный квест по этапам противоаварийной тренировки.</div>
+
+  <!-- Прогресс-бар -->
+  <div class="progress-steps" id="progressSteps">
+    <div class="step-item" data-step="0"><div class="step-circle" id="circle0">1</div><div class="step-label" id="label0">Вид ПАТ</div></div>
+    <div class="step-item" data-step="1"><div class="step-circle" id="circle1">2</div><div class="step-label" id="label1">Комиссия</div></div>
+    <div class="step-item" data-step="2"><div class="step-circle" id="circle2">3</div><div class="step-label" id="label2">Программа</div></div>
+    <div class="step-item" data-step="3"><div class="step-circle" id="circle3">4</div><div class="step-label" id="label3">Проведение</div></div>
+    <div class="step-item" data-step="4"><div class="step-circle" id="circle4">5</div><div class="step-label" id="label4">Разбор &<br>документы</div></div>
+  </div>
+
+  <!-- Панель этапа -->
+  <div class="stage-panel" id="stagePanel">
+    <!-- контент динамический -->
+  </div>
+
+  <!-- Навигация -->
+  <div class="nav-buttons">
+    <button class="btn btn-secondary" id="prevBtn" disabled>← Назад</button>
+    <span id="stepCounter">1 / 5</span>
+    <button class="btn btn-primary" id="nextBtn" disabled>Далее →</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ----- Вспомогательная функция перемешивания -----
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // ----- Исходные варианты для этапов -----
+    const baseOptions = {
+      stage0: [
+        { value: 'individual', label: 'Индивидуальная' },
+        { value: 'tseh', label: 'Цеховая' },
+        { value: 'complex', label: 'Комплексная' },
+        { value: 'plarn', label: 'Тренировка по ПЛАРН' }
+      ],
+      stage1: [
+        { value: 'glav', label: 'Главный инженер (председатель)' },
+        { value: 'nach', label: 'Начальник цеха' },
+        { value: 'pojar', label: 'Представитель пожарной службы' },
+        { value: 'ot', label: 'Инженер по охране труда' },
+        { value: 'sek', label: 'Секретарь директора' }
+      ],
+      stage2: [
+        { value: 'list', label: 'Список участников' },
+        { value: 'budget', label: 'Бюджет тренировки' },
+        { value: 'scenario', label: 'Сценарий с хронологией действий' },
+        { value: 'siz', label: 'Перечень СИЗ' }
+      ],
+      stage4: [
+        { value: 'invite', label: 'Пригласить на разбор руководителя организации' },
+        { value: 'punish', label: 'Наказать всех участников за ошибки' },
+        { value: 'plan', label: 'Разработать план корректирующих мероприятий' },
+        { value: 'akt', label: 'Оформить акт с выводами и рекомендациями' },
+        { value: 'onlylog', label: 'Ограничиться записью в журнале' }
+      ]
+    };
+
+    // Перемешиваем при загрузке
+    const shuffledOptions = {
+      stage0: shuffleArray([...baseOptions.stage0]),
+      stage1: shuffleArray([...baseOptions.stage1]),
+      stage2: shuffleArray([...baseOptions.stage2]),
+      stage4: shuffleArray([...baseOptions.stage4])
+    };
+
+    // ----- Баллы -----
+    let totalScore = 0;
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const scoreArea = document.getElementById('scoreArea');
+
+    function updateScoreUI(change = 0) {
+      scoreDisplay.textContent = totalScore;
+      if (change > 0) {
+        scoreArea.classList.add('pop');
+        setTimeout(() => scoreArea.classList.remove('pop'), 300);
+      }
+    }
+
+    function addScore(stepIndex) {
+      if (!stepData[stepIndex].done) {
+        totalScore += 1;
+        updateScoreUI(1);
+      }
+    }
+
+    function subtractScore(stepIndex) {
+      if (stepData[stepIndex].done) {
+        totalScore -= 1;
+        if (totalScore < 0) totalScore = 0;
+        updateScoreUI(0);
+      }
+    }
+
+    // ----- Данные этапов (с использованием перемешанных вариантов) -----
+    const stages = [
+      { // 0: Вид ПАТ
+        title: 'Выбор вида тренировки',
+        desc: 'Какую ПАТ вы выберете для проверки взаимодействия всех служб, включая внешние?',
+        hint: 'Подумайте, какой вид тренировки охватывает всю организацию и привлекает внешние аварийно-спасательные формирования.',
+        render: function() {
+          let html = `<div class="task-area"><p>Выберите один вариант:</p><div class="options-vertical" id="stage0Options">`;
+          shuffledOptions.stage0.forEach(opt => {
+            html += `
+              <div class="option-item" data-value="${opt.value}">
+                <input type="radio" name="stage0" id="s0_${opt.value}" value="${opt.value}">
+                <label for="s0_${opt.value}">${opt.label}</label>
+              </div>
+            `;
+          });
+          html += `</div>
+            <div id="stage0Feedback" class="feedback-box"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="stage0Check">Проверить</button>
+              <button class="btn btn-reset" id="stage0Reset">Сбросить</button>
+            </div>
+          </div>`;
+          return html;
+        },
+        check: function() {
+          const selected = document.querySelector('input[name="stage0"]:checked');
+          if (!selected) return { done: false, message: 'Выберите вариант.' };
+          const val = selected.value;
+          const correct = val === 'complex';
+          const fb = document.getElementById('stage0Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          if (correct) {
+            fb.classList.add('success');
+            fb.textContent = '✅ Верно! Отличный выбор.';
+            document.querySelectorAll('#stage0Options .option-item').forEach(el => el.classList.add('disabled'));
+            document.querySelectorAll('#stage0Options input').forEach(inp => inp.disabled = true);
+            document.getElementById('stage0Check').disabled = true;
+            document.getElementById('stage0Reset').disabled = true;
+            addScore(0);
+            return { done: true, correct: true };
+          } else {
+            fb.classList.add('error');
+            fb.textContent = '❌ Неверно. ' + stages[0].hint;
+            const selectedItem = document.querySelector('#stage0Options .option-item input:checked')?.closest('.option-item');
+            if (selectedItem) {
+              selectedItem.classList.add('wrong');
+            }
+            return { done: false, correct: false };
+          }
+        },
+        reset: function() {
+          if (stepData[0].done) {
+            subtractScore(0);
+          }
+          document.querySelectorAll('#stage0Options .option-item').forEach(el => {
+            el.classList.remove('correct', 'wrong', 'disabled');
+          });
+          document.querySelectorAll('#stage0Options input').forEach(inp => {
+            inp.checked = false;
+            inp.disabled = false;
+          });
+          const fb = document.getElementById('stage0Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          document.getElementById('stage0Check').disabled = false;
+          document.getElementById('stage0Reset').disabled = false;
+          stepData[0].done = false;
+          stepData[0].correct = false;
+          updateProgress(0);
+          nextBtn.disabled = true;
+        }
+      },
+      { // 1: Комиссия
+        title: 'Формирование комиссии',
+        desc: 'Кого вы включите в состав комиссии для комплексной ПАТ? Выберите всех подходящих.',
+        hint: 'В комиссию должны входить те, кто обладает компетенцией в области безопасности и производства. Секретарь не нужен.',
+        render: function() {
+          let html = `<div class="task-area"><p>Отметьте правильные варианты (несколько):</p><div class="options-vertical" id="stage1Options">`;
+          shuffledOptions.stage1.forEach(opt => {
+            html += `
+              <div class="option-item" data-value="${opt.value}">
+                <input type="checkbox" id="s1_${opt.value}" value="${opt.value}">
+                <label for="s1_${opt.value}">${opt.label}</label>
+              </div>
+            `;
+          });
+          html += `</div>
+            <div id="stage1Feedback" class="feedback-box"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="stage1Check">Проверить</button>
+              <button class="btn btn-reset" id="stage1Reset">Сбросить</button>
+            </div>
+          </div>`;
+          return html;
+        },
+        check: function() {
+          const checked = document.querySelectorAll('#stage1Options input[type="checkbox"]:checked');
+          const values = Array.from(checked).map(cb => cb.value);
+          const correct = ['glav','nach','pojar','ot'];
+          const isCorrect = values.length === correct.length && values.every(v => correct.includes(v));
+          const fb = document.getElementById('stage1Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          if (isCorrect) {
+            fb.classList.add('success');
+            fb.textContent = '✅ Верно! Состав комиссии подобран правильно.';
+            document.querySelectorAll('#stage1Options .option-item').forEach(el => el.classList.add('disabled'));
+            document.querySelectorAll('#stage1Options input').forEach(inp => inp.disabled = true);
+            document.getElementById('stage1Check').disabled = true;
+            document.getElementById('stage1Reset').disabled = true;
+            document.querySelectorAll('#stage1Options .option-item').forEach(el => {
+              if (correct.includes(el.dataset.value)) {
+                el.classList.add('correct');
+              }
+            });
+            addScore(1);
+            return { done: true, correct: true };
+          } else {
+            fb.classList.add('error');
+            fb.textContent = '❌ Неверно. ' + stages[1].hint;
+            document.querySelectorAll('#stage1Options .option-item input:checked').forEach(inp => {
+              const item = inp.closest('.option-item');
+              if (!correct.includes(item.dataset.value)) {
+                item.classList.add('wrong');
+              }
+            });
+            return { done: false, correct: false };
+          }
+        },
+        reset: function() {
+          if (stepData[1].done) {
+            subtractScore(1);
+          }
+          document.querySelectorAll('#stage1Options .option-item').forEach(el => {
+            el.classList.remove('correct', 'wrong', 'disabled');
+          });
+          document.querySelectorAll('#stage1Options input').forEach(inp => {
+            inp.checked = false;
+            inp.disabled = false;
+          });
+          const fb = document.getElementById('stage1Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          document.getElementById('stage1Check').disabled = false;
+          document.getElementById('stage1Reset').disabled = false;
+          stepData[1].done = false;
+          stepData[1].correct = false;
+          updateProgress(1);
+          nextBtn.disabled = true;
+        }
+      },
+      { // 2: Программа
+        title: 'Разработка программы',
+        desc: 'Какой раздел программы является обязательным и содержит пошаговый порядок действий?',
+        hint: 'Вспомните, какой раздел описывает конкретные действия персонала при аварии — это основа программы.',
+        render: function() {
+          let html = `<div class="task-area"><p>Выберите один вариант:</p><div class="options-vertical" id="stage2Options">`;
+          shuffledOptions.stage2.forEach(opt => {
+            html += `
+              <div class="option-item" data-value="${opt.value}">
+                <input type="radio" name="stage2" id="s2_${opt.value}" value="${opt.value}">
+                <label for="s2_${opt.value}">${opt.label}</label>
+              </div>
+            `;
+          });
+          html += `</div>
+            <div id="stage2Feedback" class="feedback-box"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="stage2Check">Проверить</button>
+              <button class="btn btn-reset" id="stage2Reset">Сбросить</button>
+            </div>
+          </div>`;
+          return html;
+        },
+        check: function() {
+          const selected = document.querySelector('input[name="stage2"]:checked');
+          if (!selected) return { done: false, message: 'Выберите вариант.' };
+          const val = selected.value;
+          const correct = val === 'scenario';
+          const fb = document.getElementById('stage2Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          if (correct) {
+            fb.classList.add('success');
+            fb.textContent = '✅ Верно! Сценарий — ключевой раздел.';
+            document.querySelectorAll('#stage2Options .option-item').forEach(el => el.classList.add('disabled'));
+            document.querySelectorAll('#stage2Options input').forEach(inp => inp.disabled = true);
+            document.getElementById('stage2Check').disabled = true;
+            document.getElementById('stage2Reset').disabled = true;
+            addScore(2);
+            return { done: true, correct: true };
+          } else {
+            fb.classList.add('error');
+            fb.textContent = '❌ Неверно. ' + stages[2].hint;
+            const selectedItem = document.querySelector('#stage2Options .option-item input:checked')?.closest('.option-item');
+            if (selectedItem) selectedItem.classList.add('wrong');
+            return { done: false, correct: false };
+          }
+        },
+        reset: function() {
+          if (stepData[2].done) {
+            subtractScore(2);
+          }
+          document.querySelectorAll('#stage2Options .option-item').forEach(el => {
+            el.classList.remove('correct', 'wrong', 'disabled');
+          });
+          document.querySelectorAll('#stage2Options input').forEach(inp => {
+            inp.checked = false;
+            inp.disabled = false;
+          });
+          const fb = document.getElementById('stage2Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          document.getElementById('stage2Check').disabled = false;
+          document.getElementById('stage2Reset').disabled = false;
+          stepData[2].done = false;
+          stepData[2].correct = false;
+          updateProgress(2);
+          nextBtn.disabled = true;
+        }
+      },
+      { // 3: Проведение (без перемешивания)
+        title: 'Распределение обязанностей',
+        desc: 'Кто отвечает за следующие действия во время ПАТ? Для каждого действия выберите правильную категорию.',
+        hint: 'Организатор обеспечивает порядок и условия наблюдения, комиссия фиксирует и анализирует.',
+        render: function() {
+          const actions = [
+            { id: 'a1', label: 'Следить, чтобы не было посторонних' },
+            { id: 'a2', label: 'Расставить членов комиссии для наблюдения' },
+            { id: 'a3', label: 'Фиксировать время и соответствие регламенту' },
+            { id: 'a4', label: 'Наблюдать за действиями участников' }
+          ];
+          let html = `<div class="task-area"><p>Для каждого действия выберите, кто его выполняет:</p><div class="dist-list" id="stage3List">`;
+          actions.forEach(a => {
+            html += `
+              <div class="dist-row" data-action="${a.id}">
+                <span class="action-label">${a.label}</span>
+                <div class="radio-group">
+                  <label><input type="radio" name="${a.id}" value="organizator"> Организатор</label>
+                  <label><input type="radio" name="${a.id}" value="komissia"> Комиссия</label>
+                </div>
+              </div>
+            `;
+          });
+          html += `</div>
+            <div id="stage3Feedback" class="feedback-box"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="stage3Check">Проверить</button>
+              <button class="btn btn-reset" id="stage3Reset">Сбросить</button>
+            </div>
+          </div>`;
+          return html;
+        },
+        check: function() {
+          const correctMap = {
+            a1: 'organizator',
+            a2: 'organizator',
+            a3: 'komissia',
+            a4: 'komissia'
+          };
+          const allSelected = document.querySelectorAll('#stage3List .dist-row input[type="radio"]:checked');
+          if (allSelected.length < 4) {
+            return { done: false, message: 'Выберите категорию для каждого действия.' };
+          }
+          let isCorrect = true;
+          allSelected.forEach(inp => {
+            const actionId = inp.name;
+            const value = inp.value;
+            if (correctMap[actionId] !== value) {
+              isCorrect = false;
+            }
+          });
+          const fb = document.getElementById('stage3Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          if (isCorrect) {
+            fb.classList.add('success');
+            fb.textContent = '✅ Верно! Все обязанности распределены правильно.';
+            document.querySelectorAll('#stage3List .dist-row').forEach(el => el.classList.add('disabled'));
+            document.querySelectorAll('#stage3List input').forEach(inp => inp.disabled = true);
+            document.getElementById('stage3Check').disabled = true;
+            document.getElementById('stage3Reset').disabled = true;
+            addScore(3);
+            return { done: true, correct: true };
+          } else {
+            fb.classList.add('error');
+            fb.textContent = '❌ Неверно. ' + stages[3].hint;
+            document.querySelectorAll('#stage3List .dist-row').forEach(item => {
+              const radios = item.querySelectorAll('input[type="radio"]');
+              let selected = null;
+              radios.forEach(r => { if (r.checked) selected = r; });
+              if (selected) {
+                const actionId = selected.name;
+                if (correctMap[actionId] !== selected.value) {
+                  item.classList.add('wrong-row');
+                } else {
+                  item.classList.add('correct-row');
+                }
+              }
+            });
+            return { done: false, correct: false };
+          }
+        },
+        reset: function() {
+          if (stepData[3].done) {
+            subtractScore(3);
+          }
+          document.querySelectorAll('#stage3List .dist-row').forEach(el => {
+            el.classList.remove('correct-row', 'wrong-row', 'disabled');
+          });
+          document.querySelectorAll('#stage3List input').forEach(inp => {
+            inp.checked = false;
+            inp.disabled = false;
+          });
+          const fb = document.getElementById('stage3Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          document.getElementById('stage3Check').disabled = false;
+          document.getElementById('stage3Reset').disabled = false;
+          stepData[3].done = false;
+          stepData[3].correct = false;
+          updateProgress(3);
+          nextBtn.disabled = true;
+        }
+      },
+      { // 4: Разбор и документирование
+        title: 'Разбор и документирование',
+        desc: 'Какие действия являются верными при разборе и оформлении результатов ПАТ? Выберите все правильные.',
+        hint: 'Цель разбора — выявить недостатки и улучшить подготовку, а не наказать. Протоколирование должно быть полным.',
+        render: function() {
+          let html = `<div class="task-area"><p>Отметьте правильные варианты (несколько):</p><div class="options-vertical" id="stage4Options">`;
+          shuffledOptions.stage4.forEach(opt => {
+            html += `
+              <div class="option-item" data-value="${opt.value}">
+                <input type="checkbox" id="s4_${opt.value}" value="${opt.value}">
+                <label for="s4_${opt.value}">${opt.label}</label>
+              </div>
+            `;
+          });
+          html += `</div>
+            <div id="stage4Feedback" class="feedback-box"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="stage4Check">Проверить</button>
+              <button class="btn btn-reset" id="stage4Reset">Сбросить</button>
+            </div>
+          </div>`;
+          return html;
+        },
+        check: function() {
+          const checked = document.querySelectorAll('#stage4Options input[type="checkbox"]:checked');
+          const values = Array.from(checked).map(cb => cb.value);
+          const correct = ['invite','plan','akt'];
+          const isCorrect = values.length === correct.length && values.every(v => correct.includes(v));
+          const fb = document.getElementById('stage4Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          if (isCorrect) {
+            fb.classList.add('success');
+            fb.textContent = '✅ Верно! Действия выбраны правильно.';
+            document.querySelectorAll('#stage4Options .option-item').forEach(el => el.classList.add('disabled'));
+            document.querySelectorAll('#stage4Options input').forEach(inp => inp.disabled = true);
+            document.getElementById('stage4Check').disabled = true;
+            document.getElementById('stage4Reset').disabled = true;
+            addScore(4);
+            return { done: true, correct: true };
+          } else {
+            fb.classList.add('error');
+            fb.textContent = '❌ Неверно. ' + stages[4].hint;
+            document.querySelectorAll('#stage4Options .option-item input:checked').forEach(inp => {
+              const item = inp.closest('.option-item');
+              if (!correct.includes(item.dataset.value)) {
+                item.classList.add('wrong');
+              }
+            });
+            return { done: false, correct: false };
+          }
+        },
+        reset: function() {
+          if (stepData[4].done) {
+            subtractScore(4);
+          }
+          document.querySelectorAll('#stage4Options .option-item').forEach(el => {
+            el.classList.remove('correct', 'wrong', 'disabled');
+          });
+          document.querySelectorAll('#stage4Options input').forEach(inp => {
+            inp.checked = false;
+            inp.disabled = false;
+          });
+          const fb = document.getElementById('stage4Feedback');
+          fb.className = 'feedback-box';
+          fb.textContent = '';
+          document.getElementById('stage4Check').disabled = false;
+          document.getElementById('stage4Reset').disabled = false;
+          stepData[4].done = false;
+          stepData[4].correct = false;
+          updateProgress(4);
+          nextBtn.disabled = true;
+        }
+      }
+    ];
+
+    // ----- Состояние -----
+    let currentStep = 0;
+    const totalSteps = stages.length;
+    let stepData = stages.map(() => ({ done: false, correct: false }));
+
+    const stagePanel = document.getElementById('stagePanel');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const stepCounter = document.getElementById('stepCounter');
+
+    function updateProgress(step) {
+      for (let i = 0; i < totalSteps; i++) {
+        const circle = document.getElementById(`circle${i}`);
+        const label = document.getElementById(`label${i}`);
+        circle.classList.remove('active', 'done');
+        label.classList.remove('active', 'done');
+        if (i === step) {
+          circle.classList.add('active');
+          label.classList.add('active');
+        } else if (stepData[i].done) {
+          circle.classList.add('done');
+          label.classList.add('done');
+        }
+      }
+    }
+
+    function blockAndShowSuccess(step) {
+      if (step === 0) {
+        document.querySelectorAll('#stage0Options .option-item').forEach(el => el.classList.add('disabled'));
+        document.querySelectorAll('#stage0Options input').forEach(inp => inp.disabled = true);
+        document.getElementById('stage0Check').disabled = true;
+        document.getElementById('stage0Reset').disabled = true;
+        const fb = document.getElementById('stage0Feedback');
+        fb.className = 'feedback-box success';
+        fb.textContent = '✅ Этап пройден.';
+      } else if (step === 1) {
+        document.querySelectorAll('#stage1Options .option-item').forEach(el => el.classList.add('disabled'));
+        document.querySelectorAll('#stage1Options input').forEach(inp => inp.disabled = true);
+        document.getElementById('stage1Check').disabled = true;
+        document.getElementById('stage1Reset').disabled = true;
+        const fb = document.getElementById('stage1Feedback');
+        fb.className = 'feedback-box success';
+        fb.textContent = '✅ Этап пройден.';
+      } else if (step === 2) {
+        document.querySelectorAll('#stage2Options .option-item').forEach(el => el.classList.add('disabled'));
+        document.querySelectorAll('#stage2Options input').forEach(inp => inp.disabled = true);
+        document.getElementById('stage2Check').disabled = true;
+        document.getElementById('stage2Reset').disabled = true;
+        const fb = document.getElementById('stage2Feedback');
+        fb.className = 'feedback-box success';
+        fb.textContent = '✅ Этап пройден.';
+      } else if (step === 3) {
+        document.querySelectorAll('#stage3List .dist-row').forEach(el => el.classList.add('disabled'));
+        document.querySelectorAll('#stage3List input').forEach(inp => inp.disabled = true);
+        document.getElementById('stage3Check').disabled = true;
+        document.getElementById('stage3Reset').disabled = true;
+        const fb = document.getElementById('stage3Feedback');
+        fb.className = 'feedback-box success';
+        fb.textContent = '✅ Этап пройден.';
+      } else if (step === 4) {
+        document.querySelectorAll('#stage4Options .option-item').forEach(el => el.classList.add('disabled'));
+        document.querySelectorAll('#stage4Options input').forEach(inp => inp.disabled = true);
+        document.getElementById('stage4Check').disabled = true;
+        document.getElementById('stage4Reset').disabled = true;
+        const fb = document.getElementById('stage4Feedback');
+        fb.className = 'feedback-box success';
+        fb.textContent = '✅ Этап пройден.';
+      }
+    }
+
+    function renderStep(step) {
+      const stage = stages[step];
+      let html = `<div class="stage-title">${stage.title}</div>`;
+      html += `<div class="stage-desc">${stage.desc}</div>`;
+      html += stage.render();
+      stagePanel.innerHTML = html;
+
+      const checkBtn = document.getElementById(`stage${step}Check`);
+      const resetBtn = document.getElementById(`stage${step}Reset`);
+      if (checkBtn) {
+        checkBtn.addEventListener('click', function() {
+          const result = stage.check();
+          if (result.done && result.correct) {
+            stepData[step].done = true;
+            stepData[step].correct = true;
+            updateProgress(step);
+            if (step === totalSteps - 1) {
+              nextBtn.disabled = true;
+              showFinalResult();
+            } else {
+              nextBtn.disabled = false;
+            }
+          } else if (result.done && !result.correct) {
+            nextBtn.disabled = true;
+          } else if (result.message) {
+            alert(result.message);
+          }
+        });
+      }
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          stage.reset();
+          const resultBox = document.querySelector('.result-box');
+          if (resultBox) {
+            renderStep(step);
+          }
+          nextBtn.disabled = true;
+        });
+      }
+
+      if (stepData[step].done) {
+        blockAndShowSuccess(step);
+      }
+
+      prevBtn.disabled = (step === 0);
+      if (stepData[step].done) {
+        if (step === totalSteps - 1) {
+          showFinalResult();
+        } else {
+          nextBtn.disabled = false;
+        }
+      } else {
+        nextBtn.disabled = true;
+      }
+      stepCounter.textContent = `${step+1} / ${totalSteps}`;
+      updateProgress(step);
+    }
+
+    function showFinalResult() {
+      const correctCount = stepData.filter(s => s.correct).length;
+      let level, emoji, desc;
+      if (correctCount === totalSteps) {
+        level = '🏆 Эксперт по ПАТ';
+        emoji = '🏆';
+        desc = 'Вы отлично знаете весь процесс организации противоаварийных тренировок. Можно доверять проведение любых ПАТ!';
+      } else if (correctCount >= totalSteps - 1) {
+        level = '🥇 Опытный специалист';
+        emoji = '🥇';
+        desc = 'У вас хорошая база, но есть небольшие пробелы. Рекомендуем пересмотреть уроки по подготовке и документированию.';
+      } else if (correctCount >= totalSteps - 2) {
+        level = '📘 Требуется практика';
+        emoji = '📘';
+        desc = 'Вы знакомы с основами, но стоит углубиться в этапы проведения и разбора. Пройдите курс ещё раз.';
+      } else {
+        level = '📖 Начинающий';
+        emoji = '📖';
+        desc = 'Рекомендуем заново изучить все материалы курса и повторить интерактив.';
+      }
+      stagePanel.innerHTML = `
+        <div class="result-box">
+          <div class="big-emoji">${emoji}</div>
+          <div class="level">${level}</div>
+          <div class="sub">Вы правильно выполнили <strong>${correctCount}</strong> из ${totalSteps} этапов.</div>
+          <div class="score-final">⭐ Набрано баллов: ${totalScore}</div>
+          <div class="detail">${desc}</div>
+          <button class="reset-all-btn" onclick="location.reload()">🔄 Пройти заново</button>
+        </div>
+      `;
+      document.querySelector('.nav-buttons').style.display = 'none';
+    }
+
+    function goToStep(step) {
+      if (step < 0 || step >= totalSteps) return;
+      currentStep = step;
+      renderStep(step);
+    }
+
+    prevBtn.addEventListener('click', function() {
+      if (currentStep > 0) goToStep(currentStep - 1);
+    });
+
+    nextBtn.addEventListener('click', function() {
+      if (this.disabled) return;
+      if (currentStep < totalSteps - 1) {
+        goToStep(currentStep + 1);
+      }
+    });
+
+    updateScoreUI(0);
+    renderStep(0);
+  })();
+</script>
+
+</body>
+</html>
