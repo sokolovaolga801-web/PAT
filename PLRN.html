@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кому нужен ПЛАРН</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+    }
+    body {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: 700px;
+      height: 560px;
+      background: #f5fafd;
+      border-radius: 40px;
+      padding: 1.5rem 1.8rem 1.8rem;
+      box-shadow: 0 20px 40px rgba(30, 80, 100, 0.08), 0 8px 20px rgba(0, 0, 0, 0.03);
+      border: 1px solid #dceaf0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: 0.2s;
+    }
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      flex-shrink: 0;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 650;
+      color: #1a5a7a;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .subhead {
+      color: #2a6a8a;
+      font-size: 0.8rem;
+      padding-left: 0.8rem;
+      border-left: 3px solid #5a9ab0;
+      background: rgba(90, 154, 176, 0.06);
+      border-radius: 0 10px 10px 0;
+      padding: 0.3rem 0.8rem;
+      line-height: 1.4;
+    }
+    .top-row {
+      display: flex;
+      gap: 1rem;
+      flex-shrink: 0;
+      margin-bottom: 0.8rem;
+    }
+    .section {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 1rem 1.2rem;
+      border: 1px solid #dceaf0;
+      min-width: 0;
+      box-shadow: 0 2px 8px rgba(30, 80, 100, 0.04);
+    }
+    .section-title {
+      font-weight: 600;
+      color: #1a5a7a;
+      font-size: 0.9rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .section-title small {
+      font-weight: 400;
+      font-size: 0.7rem;
+      opacity: 0.6;
+      margin-left: auto;
+      color: #3a7a9a;
+    }
+    .toggle-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 0.45rem 0.3rem;
+      border-radius: 40px;
+      border: 1.5px solid #c8dce8;
+      background: #f5fafd;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #2a5a7a;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .toggle-btn:hover {
+      background: #e8f2f8;
+      border-color: #8ab8ce;
+    }
+    .toggle-btn.active {
+      background: #2a7a9a;
+      border-color: #2a7a9a;
+      color: white;
+      box-shadow: 0 4px 8px rgba(42, 122, 154, 0.15);
+    }
+    .toggle-btn.active-yes {
+      background: #2a8aaa;
+      border-color: #2a8aaa;
+      color: white;
+    }
+    .toggle-btn.active-no {
+      background: #7a9aaa;
+      border-color: #7a9aaa;
+      color: white;
+    }
+    .volume-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .volume-row {
+      display: flex;
+      align-items: center;
+      background: #f5fafd;
+      border-radius: 40px;
+      padding: 0.2rem 0.2rem 0.2rem 0.8rem;
+      border: 1px solid #dceaf0;
+    }
+    .volume-row label {
+      flex: 1;
+      font-weight: 500;
+      color: #1a5a7a;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      padding: 0.3rem 0;
+    }
+    .volume-row input[type="number"] {
+      width: 80px;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid #c8dce8;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: white;
+      color: #1a5a7a;
+      text-align: center;
+      transition: 0.1s;
+    }
+    .volume-row input[type="number"]:focus {
+      outline: none;
+      border-color: #4a9abb;
+      box-shadow: 0 0 0 3px rgba(74, 154, 187, 0.15);
+    }
+    .volume-row .unit {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4a7a9a;
+      margin-left: 0.1rem;
+      padding-right: 0.5rem;
+    }
+    .bottom-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 0.6rem;
+    }
+    .bottom-section .section {
+      flex: 0 0 auto;
+      padding: 0.6rem 1.2rem;
+      margin-bottom: 0;
+      background: #ffffff;
+    }
+    .check-btn {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 40px;
+      border: none;
+      background: #2a7a9a;
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+      box-shadow: 0 3px 10px rgba(42, 122, 154, 0.15);
+      letter-spacing: 0.3px;
+      margin-top: 0.2rem;
+    }
+    .check-btn:hover:not(:disabled) {
+      background: #3a8aaa;
+      transform: scale(1.01);
+      box-shadow: 0 4px 14px rgba(42, 122, 154, 0.2);
+    }
+    .check-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .result-area {
+      flex: 1;
+      background: #eaf4f8;
+      border-radius: 24px;
+      padding: 0.8rem 1.2rem;
+      color: #1a4a6a;
+      box-shadow: 0 4px 12px rgba(30, 80, 100, 0.06);
+      transition: background 0.25s ease, border-left 0.2s;
+      border-left: 5px solid #8abccf;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 80px;
+    }
+    .result-area .verdict {
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      color: #1a4a6a;
+    }
+    .result-area .verdict small {
+      font-size: 0.8rem;
+      font-weight: 400;
+      opacity: 0.7;
+      color: #3a6a8a;
+    }
+    .result-area .detail {
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+      opacity: 0.85;
+      border-top: 1px solid #c8dce8;
+      padding-top: 0.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.8rem;
+      color: #1a5a7a;
+    }
+    .result-area .detail span {
+      background: #dcecf2;
+      padding: 0.1rem 0.7rem;
+      border-radius: 30px;
+    }
+    .bottom-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+      gap: 0.8rem;
+      align-items: center;
+    }
+    .reset-btn {
+      background: transparent;
+      border: 1.5px solid #c0d8e4;
+      color: #2a6a8a;
+      padding: 0.2rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 500;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .reset-btn:hover {
+      background: #eaf2f6;
+      border-color: #8ab8ce;
+    }
+    .footnote {
+      font-size: 0.7rem;
+      color: #3a7a9a;
+      opacity: 0.7;
+      flex-shrink: 0;
+      text-align: center;
+      padding-top: 0.3rem;
+      border-top: 1px solid #dceaf0;
+      margin-top: 0.3rem;
+    }
+    @media (max-width: 720px) {
+      .card {
+        width: 100%;
+        height: auto;
+        min-height: 560px;
+        padding: 1.2rem;
+      }
+      .top-row {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      .volume-row input[type="number"] {
+        width: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <!-- Шапка -->
+  <div class="header">
+    <h1>🧪 Кому нужен ПЛАРН</h1>
+    <div class="subhead">проверка необходимости разработки</div>
+  </div>
+
+  <!-- Два блока параллельно -->
+  <div class="top-row">
+    <!-- Блок 1: Работа с нефтью -->
+    <div class="section">
+      <div class="section-title">
+        <span>🛢️</span> Работа с нефтью
+        <small>хранение, перекачка, перевозка</small>
+      </div>
+      <div class="toggle-group" id="workToggleGroup">
+        <button class="toggle-btn" data-value="yes" id="workYes">✅ Да</button>
+        <button class="toggle-btn" data-value="no" id="workNo">❌ Нет</button>
+      </div>
+    </div>
+
+    <!-- Блок 2: Объёмы (активен только при "Да") -->
+    <div class="section" id="volumeSection" style="opacity:0.5; pointer-events:none; transition:0.2s;">
+      <div class="section-title">
+        <span>📊</span> Объём разлива
+        <small>вода ≥0.5 т, суша ≥3 т</small>
+      </div>
+      <div class="volume-grid">
+        <div class="volume-row">
+          <label for="waterVol">💧 Водный объект</label>
+          <input type="number" id="waterVol" value="0.0" step="0.1" min="0" placeholder="0.0">
+          <span class="unit">т</span>
+        </div>
+        <div class="volume-row">
+          <label for="landVol">🌲 Сухопутный</label>
+          <input type="number" id="landVol" value="0.0" step="0.1" min="0" placeholder="0.0">
+          <span class="unit">т</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Третий блок внизу -->
+  <div class="bottom-section">
+    <div class="section" style="padding: 0.6rem 1.2rem;">
+      <button class="check-btn" id="checkBtn">🔍 Проверить</button>
+    </div>
+
+    <!-- Результат -->
+    <div class="result-area" id="resultArea">
+      <div class="verdict" id="verdictText">
+        ⏳ выберите условия
+        <small>укажите, работаете ли с нефтью</small>
+      </div>
+      <div class="detail" id="detailText">
+        <span>💧 водный: 0,0 т</span>
+        <span>🌲 сухопутный: 0,0 т</span>
+      </div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="reset-btn" id="resetBtn">↺ Сбросить</button>
+      <span style="font-size:0.65rem; color:#3a7a9a; opacity:0.6;">ПЛАРН обязателен при работе с нефтью И превышении порога</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const workYes = document.getElementById('workYes');
+    const workNo = document.getElementById('workNo');
+    const waterInput = document.getElementById('waterVol');
+    const landInput = document.getElementById('landVol');
+    const verdictText = document.getElementById('verdictText');
+    const detailText = document.getElementById('detailText');
+    const resultArea = document.getElementById('resultArea');
+    const volumeSection = document.getElementById('volumeSection');
+    const resetBtn = document.getElementById('resetBtn');
+    const checkBtn = document.getElementById('checkBtn');
+
+    const WATER_THRESHOLD = 0.5;
+    const LAND_THRESHOLD = 3;
+
+    let worksWithOil = null;
+
+    function updateVolumeSection() {
+      if (worksWithOil === true) {
+        volumeSection.style.opacity = '1';
+        volumeSection.style.pointerEvents = 'auto';
+        workYes.classList.add('active', 'active-yes');
+        workNo.classList.remove('active', 'active-no');
+        checkBtn.disabled = false;
+      } else if (worksWithOil === false) {
+        volumeSection.style.opacity = '0.5';
+        volumeSection.style.pointerEvents = 'none';
+        workNo.classList.add('active', 'active-no');
+        workYes.classList.remove('active', 'active-yes');
+        checkBtn.disabled = true;
+      } else {
+        volumeSection.style.opacity = '0.5';
+        volumeSection.style.pointerEvents = 'none';
+        workYes.classList.remove('active', 'active-yes');
+        workNo.classList.remove('active', 'active-no');
+        checkBtn.disabled = true;
+      }
+    }
+
+    function performCheck() {
+      let waterVal = parseFloat(waterInput.value.replace(',', '.')) || 0;
+      let landVal = parseFloat(landInput.value.replace(',', '.')) || 0;
+      if (waterVal < 0) waterVal = 0;
+      if (landVal < 0) landVal = 0;
+      waterInput.value = waterVal.toFixed(1);
+      landInput.value = landVal.toFixed(1);
+
+      const waterExceed = waterVal >= WATER_THRESHOLD;
+      const landExceed = landVal >= LAND_THRESHOLD;
+
+      let detailHtml = `
+        <span>💧 водный: ${waterVal.toFixed(1)} т ${waterExceed ? '⚠️ ≥0.5' : '✅ <0.5'}</span>
+        <span>🌲 сухопутный: ${landVal.toFixed(1)} т ${landExceed ? '⚠️ ≥3' : '✅ <3'}</span>
+      `;
+
+      let verdictHtml = '';
+      let borderColor = '#8abccf';
+      let bgColor = '#eaf4f8';
+
+      if (worksWithOil === null) {
+        verdictHtml = `
+          <span style="opacity:0.6;">⏳ выберите статус работы</span>
+          <small>укажите, работаете ли с нефтью</small>
+        `;
+        borderColor = '#8abccf';
+        bgColor = '#eaf4f8';
+      } else if (worksWithOil === false) {
+        verdictHtml = `
+          <span style="color: #3a8a7a;">✅ ПЛАРН НЕ ТРЕБУЕТСЯ</span>
+          <small>предприятие не работает с нефтью</small>
+        `;
+        borderColor = '#6aaa9a';
+        bgColor = '#e8f4f0';
+      } else if (worksWithOil === true) {
+        const needPlan = waterExceed || landExceed;
+        if (needPlan) {
+          verdictHtml = `
+            <span style="color: #c87a3a;">⚠️ ПЛАРН НУЖЕН</span>
+            <small>обязательная разработка</small>
+          `;
+          borderColor = '#c8a03a';
+          bgColor = '#f8f4e8';
+        } else {
+          if (waterVal === 0 && landVal === 0) {
+            verdictHtml = `
+              <span style="opacity:0.6;">⏳ укажите объёмы разлива</span>
+              <small>введите данные и нажмите «Проверить»</small>
+            `;
+            borderColor = '#8abccf';
+            bgColor = '#eaf4f8';
+          } else {
+            verdictHtml = `
+              <span style="color: #3a8a7a;">✅ ПЛАРН НЕ ТРЕБУЕТСЯ</span>
+              <small>пороги не превышены</small>
+            `;
+            borderColor = '#6aaa9a';
+            bgColor = '#e8f4f0';
+          }
+        }
+      }
+
+      resultArea.style.background = bgColor;
+      resultArea.style.borderLeft = `5px solid ${borderColor}`;
+      verdictText.innerHTML = verdictHtml;
+      detailText.innerHTML = detailHtml;
+    }
+
+    function setWorkStatus(value) {
+      worksWithOil = value;
+      updateVolumeSection();
+      performCheck();
+    }
+
+    workYes.addEventListener('click', function() {
+      setWorkStatus(true);
+    });
+
+    workNo.addEventListener('click', function() {
+      setWorkStatus(false);
+    });
+
+    checkBtn.addEventListener('click', performCheck);
+
+    waterInput.addEventListener('blur', function() {
+      let val = parseFloat(this.value.replace(',', '.'));
+      if (isNaN(val) || val < 0) this.value = '0.0';
+    });
+    landInput.addEventListener('blur', function() {
+      let val = parseFloat(this.value.replace(',', '.'));
+      if (isNaN(val) || val < 0) this.value = '0.0';
+    });
+
+    function resetAll() {
+      worksWithOil = null;
+      waterInput.value = '0.0';
+      landInput.value = '0.0';
+      workYes.classList.remove('active', 'active-yes');
+      workNo.classList.remove('active', 'active-no');
+      updateVolumeSection();
+      performCheck();
+      resultArea.style.borderLeft = '5px solid #8abccf';
+    }
+
+    resetBtn.addEventListener('click', resetAll);
+    resetAll();
+  })();
+</script>
+</body>
+</html>
