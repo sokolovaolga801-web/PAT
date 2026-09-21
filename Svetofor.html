@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Светофор ПЛРН — 700×350</title>
+<style>
+  :root{
+    --page-bg:#ffffff;
+    --card-bg:#ffffff;
+    --card-soft:#f4f8fd;
+    --line:#c9dcf1;
+    --line-strong:#a9c7e6;
+    --text:#0f2a4a;
+    --muted:#5b7897;
+    --accent:#1d6fd1;
+    --accent-2:#4a97e8;
+    --accent-soft:#e8f1fc;
+    --green:#1faa5f;
+    --green-bg:#e5f7ec;
+    --green-line:#9bd9b6;
+    --red:#d94343;
+    --red-bg:#fdeaea;
+    --red-line:#f0b3b3;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--page-bg);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+  }
+
+  /* ===== ФИКСИРОВАННАЯ ОБЛАСТЬ 700×350 ===== */
+  .widget{
+    width:700px;
+    height:350px;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:
+      0 16px 36px rgba(29,111,209,.14),
+      0 2px 6px rgba(15,42,74,.05);
+    padding:10px 14px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    position:relative;
+  }
+  .widget::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:14px;
+    pointer-events:none;
+    background:radial-gradient(420px 160px at 12% -10%, rgba(74,151,232,.12), transparent 70%);
+  }
+
+  /* ===== ШАПКА ===== */
+  .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:6px;
+    position:relative;
+    z-index:1;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-weight:700;
+    font-size:12.5px;
+    letter-spacing:.2px;
+    color:var(--text);
+  }
+  .brand .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px rgba(29,111,209,.14);
+  }
+  .brand small{
+    display:block;
+    font-weight:400;
+    font-size:10px;
+    color:var(--muted);
+    margin-top:1px;
+  }
+  .score{
+    font-weight:700;
+    font-size:11.5px;
+    color:var(--text);
+    white-space:nowrap;
+    background:var(--accent-soft);
+    border:1px solid var(--line-strong);
+    border-radius:99px;
+    padding:2px 10px;
+  }
+
+  /* ===== СЦЕНА ===== */
+  .stage{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    position:relative;
+    z-index:1;
+  }
+  .badge{
+    align-self:flex-start;
+    font-size:10px;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    color:var(--accent);
+    background:var(--accent-soft);
+    border:1px solid var(--line-strong);
+    border-radius:99px;
+    padding:2px 8px;
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  .title{
+    font-size:13.5px;
+    line-height:1.28;
+    font-weight:700;
+    margin:0 0 2px;
+    min-height:34px;
+    display:flex;
+    align-items:center;
+    color:var(--text);
+  }
+  .hint{
+    font-size:11px;
+    color:var(--muted);
+    margin:0 0 6px;
+    min-height:13px;
+  }
+
+  /* ===== КНОПКИ ОТВЕТА ===== */
+  .buttons{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+  }
+  .btn{
+    cursor:pointer;
+    border:1px solid var(--line-strong);
+    background:var(--card-soft);
+    color:var(--text);
+    border-radius:9px;
+    padding:7px 6px;
+    font-size:11.5px;
+    font-weight:600;
+    transition:.16s;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    text-align:center;
+    line-height:1.1;
+    white-space:nowrap;
+  }
+  .btn .ic{font-size:14px;line-height:1;}
+  .btn:hover:not(:disabled){
+    transform:translateY(-1px);
+    border-color:var(--accent);
+    background:#eef5fd;
+    box-shadow:0 5px 12px rgba(29,111,209,.15);
+  }
+  .btn:disabled{cursor:default;}
+  .btn.correct{
+    background:var(--green-bg);
+    border-color:var(--green-line);
+    color:#0d5c33;
+  }
+  .btn.wrong{
+    background:var(--red-bg);
+    border-color:var(--red-line);
+    color:#8a1f1f;
+  }
+  .btn.dim{opacity:.42;}
+
+  /* ===== ОБРАТНАЯ СВЯЗЬ ===== */
+  .feedback{
+    margin-top:6px;
+    border-radius:9px;
+    padding:7px 9px;
+    font-size:11px;
+    line-height:1.35;
+    display:none;
+    border:1px solid var(--line);
+    background:var(--card-soft);
+    flex:1;
+    min-height:0;
+    overflow:auto;
+    color:var(--text);
+  }
+  .feedback.show{display:block;animation:in .2s ease;}
+  @keyframes in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .feedback.ok{
+    border-color:var(--green-line);
+    background:var(--green-bg);
+  }
+  .feedback.bad{
+    border-color:var(--red-line);
+    background:var(--red-bg);
+  }
+  .verdict{font-weight:700;font-size:11.5px;margin-bottom:3px;color:var(--text);}
+  .explain{color:var(--text);}
+  .rule{
+    margin-top:5px;
+    font-size:10px;
+    color:var(--muted);
+    border-left:3px solid var(--accent);
+    padding-left:7px;
+  }
+
+  /* ===== ПОДВАЛ ===== */
+  .foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:6px;
+    min-height:28px;
+    position:relative;
+    z-index:1;
+  }
+  .foot .tip{
+    font-size:10px;
+    color:var(--muted);
+  }
+  .next{
+    cursor:pointer;
+    background:linear-gradient(180deg,var(--accent-2),var(--accent));
+    color:#ffffff;
+    border:none;
+    border-radius:8px;
+    padding:7px 14px;
+    font-size:11.5px;
+    font-weight:700;
+    transition:.16s;
+    display:none;
+    box-shadow:0 5px 12px rgba(29,111,209,.28);
+  }
+  .next.show{display:inline-block;animation:in .2s ease;}
+  .next:hover{filter:brightness(1.05);transform:translateY(-1px);}
+
+  /* ===== ФИНАЛ ===== */
+  .final{
+    display:none;
+    flex:1;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 20px;
+  }
+  .final.show{display:flex;animation:in .25s ease;}
+  .final .big{
+    font-size:38px;
+    font-weight:800;
+    line-height:1;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin:2px 0 6px;
+  }
+  .final h2{margin:0;font-size:16px;color:var(--text);}
+  .final p{
+    color:var(--muted);
+    font-size:11.5px;
+    line-height:1.45;
+    max-width:520px;
+    margin:0 0 10px;
+  }
+  .restart{
+    cursor:pointer;
+    background:#ffffff;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    border-radius:8px;
+    padding:7px 16px;
+    font-size:11.5px;
+    font-weight:600;
+    transition:.16s;
+  }
+  .restart:hover{
+    background:var(--accent-soft);
+    transform:translateY(-1px);
+  }
+</style>
+</head>
+<body>
+
+<div class="widget" id="widget">
+
+  <!-- Шапка -->
+  <div class="head">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        Светофор ПЛРН
+        <small>Постановления № 2451 и № 2366</small>
+      </div>
+    </div>
+    <div class="score" id="scoreLabel">0 / 0</div>
+  </div>
+
+  <!-- Сцена -->
+  <div class="stage" id="stage">
+    <span class="badge" id="badge">Объект 1</span>
+    <h2 class="title" id="objectTitle">—</h2>
+    <p class="hint" id="objectHint">—</p>
+
+    <div class="buttons">
+      <button class="btn" data-answer="yes"><span class="ic">🟢</span>ПЛРН нужен</button>
+      <button class="btn" data-answer="no"><span class="ic">🔴</span>ПЛРН не нужен</button>
+      <button class="btn" data-answer="unknown"><span class="ic">🟡</span>Недостаточно данных</button>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="verdict" id="verdict"></div>
+      <div class="explain" id="explain"></div>
+      <div class="rule" id="rule"></div>
+    </div>
+  </div>
+
+  <!-- Финал -->
+  <div class="final" id="finalScreen">
+    <h2 id="finalTitle">Готово!</h2>
+    <div class="big" id="finalScore">0 / 0</div>
+    <p id="finalText"></p>
+    <button class="restart" id="restartBtn">Пройти заново</button>
+  </div>
+
+  <!-- Подвал -->
+  <div class="foot" id="foot">
+    <div class="tip" id="tip">Выберите один из трех вариантов ответа</div>
+    <button class="next" id="nextBtn">Далее →</button>
+  </div>
+
+</div>
+
+<script>
+/* ============================
+   ДАННЫЕ КАРТОЧЕК
+   ============================ */
+const CARDS = [
+  {
+    title: "Нефтебаза, максимальный расчетный объем разлива — 4,2 т",
+    hint: "Суша. Хранение и перевалка нефтепродуктов.",
+    answer: "yes",
+    verdict: "🟢 ПЛРН нужен",
+    explain: "Работа с нефтепродуктами + возможный разлив превышает 3 т.",
+    rule: "№ 2451: два условия одновременно — работа с нефтью/нефтепродуктами И разлив > 3 т."
+  },
+  {
+    title: "АЗС, суммарный объем резервуаров — 80 т",
+    hint: "Автозаправочная станция.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "АЗС с суммарным объемом резервуаров менее 100 т входит в исключения.",
+    rule: "Исключение: АЗС, где общий объем резервуаров не достигает 100 т."
+  },
+  {
+    title: "Транспортная компания: только перевозка и заправка нефтепродуктов",
+    hint: "Собственных резервуарных парков и перевалки нет.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "Деятельность ограничивается перевозкой и заправкой — это категория исключения.",
+    rule: "Исключение: транспортные компании, чья деятельность ограничена перевозкой и заправкой."
+  },
+  {
+    title: "Нефтебаза, возможный объем разлива — 2,8 т",
+    hint: "Суша. Работа с нефтепродуктами есть.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "Не выполняется второе условие: разлив не превышает 3 т.",
+    rule: "№ 2451: порог на суше — строго больше 3 т."
+  },
+  {
+    title: "Причал на реке, возможный разлив нефти — 0,7 т",
+    hint: "Акватория. Перевалка нефтепродуктов.",
+    answer: "yes",
+    verdict: "🟢 ПЛРН нужен",
+    explain: "Для объектов на воде порог ниже — 0,5 т. 0,7 т его превышает.",
+    rule: "№ 2451: для объектов на воде — возможный разлив больше 0,5 т."
+  },
+  {
+    title: "Причал на реке, возможный разлив — 0,4 т",
+    hint: "Акватория. Работа с нефтепродуктами.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "Для воды порог — 0,5 т. 0,4 т его не превышает.",
+    rule: "№ 2451: на воде ПЛРН обязателен при разливе > 0,5 т."
+  },
+  {
+    title: "Шельфовая платформа, добыча углеводородного сырья",
+    hint: "Море, континентальный шельф.",
+    answer: "yes",
+    verdict: "🟢 ПЛРН нужен",
+    explain: "Для шельфа и моря действуют отдельные требования — Постановление № 2366.",
+    rule: "№ 2366: эксплуатация сооружений, буровые работы, перевалка и бункеровка, трубопроводы."
+  },
+  {
+    title: "АЗС, суммарный объем резервуаров — 120 т",
+    hint: "Автозаправочная станция.",
+    answer: "yes",
+    verdict: "🟢 ПЛРН нужен",
+    explain: "Порог исключения для АЗС — 100 т. 120 т его превышает.",
+    rule: "Исключение для АЗС работает только при объеме резервуаров менее 100 т."
+  },
+  {
+    title: "Резервуарный парк, работа с нефтепродуктами, объем разлива не указан",
+    hint: "Данных для проверки второго условия недостаточно.",
+    answer: "unknown",
+    verdict: "🟡 Недостаточно данных",
+    explain: "Известна работа с нефтепродуктами, но без объема разлива нельзя проверить второе условие.",
+    rule: "№ 2451: нужны оба условия. Без цифры разлива вывод сделать нельзя."
+  },
+  {
+    title: "Буровые работы на море",
+    hint: "Морское сооружение.",
+    answer: "yes",
+    verdict: "🟢 ПЛРН нужен",
+    explain: "Буровые работы на море прямо указаны в требованиях Постановления № 2366.",
+    rule: "№ 2366: буровые работы — основание для обязательного ПЛРН."
+  },
+  {
+    title: "Нефтебаза, возможный объем разлива — ровно 3,0 т",
+    hint: "Суша. Работа с нефтепродуктами.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "Порог сформулирован как «больше 3 т». Ровно 3,0 т условие не выполняет.",
+    rule: "№ 2451: «возможный объем разлива больше 3 тонн» — строгое неравенство."
+  },
+  {
+    title: "Объект по хранению растительного масла, возможный разлив — 10 т",
+    hint: "Нефть и нефтепродукты не используются.",
+    answer: "no",
+    verdict: "🔴 ПЛРН не нужен",
+    explain: "Не выполняется первое условие — нет работы с нефтью/нефтепродуктами/углеводородами.",
+    rule: "№ 2451: первое условие — работа именно с нефтью/нефтепродуктами/углеводородным сырьем."
+  }
+];
+
+/* ============================
+   ЛОГИКА
+   ============================ */
+let index = 0;
+let score = 0;
+let answered = false;
+
+const els = {
+  stage: document.getElementById('stage'),
+  foot: document.getElementById('foot'),
+  tip: document.getElementById('tip'),
+  badge: document.getElementById('badge'),
+  title: document.getElementById('objectTitle'),
+  hint: document.getElementById('objectHint'),
+  buttons: [...document.querySelectorAll('.btn')],
+  feedback: document.getElementById('feedback'),
+  verdict: document.getElementById('verdict'),
+  explain: document.getElementById('explain'),
+  rule: document.getElementById('rule'),
+  nextBtn: document.getElementById('nextBtn'),
+  scoreLabel: document.getElementById('scoreLabel'),
+  finalScreen: document.getElementById('finalScreen'),
+  finalTitle: document.getElementById('finalTitle'),
+  finalScore: document.getElementById('finalScore'),
+  finalText: document.getElementById('finalText'),
+  restartBtn: document.getElementById('restartBtn')
+};
+
+function render(){
+  answered = false;
+  const c = CARDS[index];
+
+  els.badge.textContent = `Объект ${index + 1} из ${CARDS.length}`;
+  els.title.textContent = c.title;
+  els.hint.textContent = c.hint;
+
+  els.feedback.className = 'feedback';
+  els.nextBtn.classList.remove('show');
+  els.tip.textContent = 'Выберите один из трех вариантов ответа';
+
+  els.buttons.forEach(b => {
+    b.disabled = false;
+    b.classList.remove('correct', 'wrong', 'dim');
+  });
+
+  updateHud();
+}
+
+function updateHud(){
+  els.scoreLabel.textContent = `${score} / ${index}`;
+}
+
+function choose(answer){
+  if (answered) return;
+  answered = true;
+
+  const c = CARDS[index];
+  const ok = answer === c.answer;
+  if (ok) score++;
+
+  els.buttons.forEach(b => {
+    b.disabled = true;
+    const val = b.dataset.answer;
+    if (val === c.answer) b.classList.add('correct');
+    else if (val === answer) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+
+  els.feedback.className = 'feedback show ' + (ok ? 'ok' : 'bad');
+  els.verdict.textContent = (ok ? '✅ Верно! ' : '❌ Неверно. ') + c.verdict;
+  els.explain.textContent = c.explain;
+  els.rule.textContent = c.rule;
+
+  els.tip.textContent = ok ? 'Отличный ход!' : 'Разберите пояснение';
+  els.nextBtn.classList.add('show');
+  els.nextBtn.textContent = (index === CARDS.length - 1) ? 'Результат →' : 'Далее →';
+
+  updateHud();
+}
+
+function next(){
+  if (index < CARDS.length - 1){
+    index++;
+    render();
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal(){
+  els.stage.style.display = 'none';
+  els.foot.style.display = 'none';
+  els.finalScreen.classList.add('show');
+
+  els.finalScore.textContent = `${score} / ${CARDS.length}`;
+
+  const pct = score / CARDS.length;
+  let text = '';
+  if (pct === 1) text = 'Идеально! Вы уверенно различаете категории объектов и пороги ПЛРН.';
+  else if (pct >= 0.8) text = 'Отличный результат. Осталось закрепить пару нюансов.';
+  else if (pct >= 0.6) text = 'Неплохо, но повторите исключения (АЗС, транспортные компании) и водные пороги.';
+  else text = 'Рекомендуем вернуться к теории: два условия № 2451, порог на воде 0,5 т и требования № 2366.';
+
+  els.finalTitle.textContent = pct >= 0.8 ? 'Отличная работа!' : 'Тренировка завершена';
+  els.finalText.textContent = text;
+
+  els.scoreLabel.textContent = `${score} / ${CARDS.length}`;
+}
+
+function restart(){
+  index = 0;
+  score = 0;
+  els.stage.style.display = '';
+  els.foot.style.display = '';
+  els.finalScreen.classList.remove('show');
+  render();
+}
+
+els.buttons.forEach(b => b.addEventListener('click', () => choose(b.dataset.answer)));
+els.nextBtn.addEventListener('click', next);
+els.restartBtn.addEventListener('click', restart);
+
+render();
+</script>
+</body>
+</html>
