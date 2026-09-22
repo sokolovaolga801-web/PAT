@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План ЛРН: зачем он нужен | Интерактив</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            color: #1e2b3c;
+        }
+
+        /* Фиксированный контейнер 700×700, белый фон, без теней */
+        .container {
+            width: 700px;
+            height: 700px;
+            background: #ffffff;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #0a2a44;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        h1 span {
+            background: #1f4e7a;
+            color: white;
+            font-size: 1.05rem;
+            width: 2.1rem;
+            height: 2.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.7rem;
+        }
+
+        .subhead {
+            font-size: 0.95rem;
+            color: #2a4a6a;
+            margin-left: 2.7rem;
+            margin-bottom: 1.1rem;
+            font-weight: 400;
+            border-left: 3px solid #4a7fa5;
+            padding-left: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* Основная раскладка — фиксированные колонки */
+        .layout {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Вертикальный список кнопок */
+        .button-list {
+            flex: 0 0 270px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .cat-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            text-align: left;
+            background: #f7fafd;
+            border: 2px solid #e2ecf5;
+            border-radius: 1rem;
+            padding: 0.75rem 0.9rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0b2c47;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.3;
+        }
+
+        .cat-btn:hover,
+        .cat-btn.active {
+            background: #eaf3fb;
+            border-color: #1e6b9b;
+            transform: translateX(4px);
+        }
+
+        .cat-btn .btn-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .cat-btn .btn-text {
+            flex: 1;
+        }
+
+        /* Информационная панель */
+        .info-panel {
+            flex: 1;
+            background: #f9fcfe;
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.3rem;
+            border: 1px solid #e2ecf5;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            margin-bottom: 0.9rem;
+            font-size: 1rem;
+            font-weight: 650;
+            color: #0b2c47;
+            line-height: 1.3;
+        }
+
+        .info-header .emoji-big {
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .info-content {
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: #1e3c57;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            animation: fadeIn 0.28s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-content ul {
+            list-style: none;
+            padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-content li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            background: #eef4fa;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.9rem;
+        }
+
+        .info-content li::before {
+            content: "✓";
+            font-weight: 800;
+            color: #1e6b9b;
+            background: #ffffff;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #1e6b9b;
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 0.2rem 0.75rem;
+            border-radius: 30px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .placeholder-text {
+            color: #2f5577;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        /* Скрываем скроллбары для чистоты, но оставляем прокрутку */
+        .button-list::-webkit-scrollbar,
+        .info-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        .button-list::-webkit-scrollbar-thumb,
+        .info-panel::-webkit-scrollbar-thumb {
+            background: #cfe0ee;
+            border-radius: 3px;
+        }
+        .button-list::-webkit-scrollbar-track,
+        .info-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        <span>🛢️</span> План ЛРН
+    </h1>
+    <div class="subhead">Зачем нужен план разлива нефти и нефтепродуктов?</div>
+
+    <div class="layout">
+        <!-- Вертикальный список кнопок -->
+        <div class="button-list" id="buttonList">
+            <button class="cat-btn" data-key="risk">
+                <span class="btn-icon">📊</span>
+                <span class="btn-text">Заранее просчитать риски и сценарии разлива</span>
+            </button>
+            <button class="cat-btn" data-key="loc">
+                <span class="btn-icon">🧯</span>
+                <span class="btn-text">Определить порядок локализации и ликвидации разлива</span>
+            </button>
+            <button class="cat-btn" data-key="coop">
+                <span class="btn-icon">🤝</span>
+                <span class="btn-text">Наладить взаимодействие служб и надзорных органов</span>
+            </button>
+            <button class="cat-btn" data-key="ready">
+                <span class="btn-icon">⚙️</span>
+                <span class="btn-text">Обеспечить готовность сил, средств и регулярные учения</span>
+            </button>
+            <button class="cat-btn" data-key="harm">
+                <span class="btn-icon">🌿</span>
+                <span class="btn-text">Минимизировать вред людям и природе</span>
+            </button>
+        </div>
+
+        <!-- Информационная панель -->
+        <div class="info-panel" id="infoPanel">
+            <div class="info-header">
+                <span class="emoji-big" id="panelEmoji">📋</span>
+                <span id="panelTitle">Наведите на кнопку слева</span>
+            </div>
+            <div class="info-content" id="panelContent">
+                <p class="placeholder-text">
+                    Наведите курсор на любую категорию слева, чтобы увидеть, какие задачи решает План ЛРН в этом направлении.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const data = {
+            risk: {
+                emoji: "📊",
+                title: "Заранее просчитать риски и сценарии разлива",
+                content: [
+                    "Оценка вероятных объёмов и направлений распространения нефти при разных погодных условиях.",
+                    "Моделирование сценариев: от малой утечки до крупной аварии.",
+                    "Определение приоритетных зон защиты и чувствительных экосистем.",
+                    "Расчёт необходимого количества сил и средств для каждого сценария."
+                ],
+                badge: "прогноз"
+            },
+            loc: {
+                emoji: "🧯",
+                title: "Определить порядок локализации и ликвидации разлива",
+                content: [
+                    "Чёткая последовательность действий: кто, что и когда делает.",
+                    "Методы локализации (боновые заграждения, дамбы, сорбенты).",
+                    "Технологии сбора и утилизации нефтепродуктов.",
+                    "Назначение ответственных за этапы ликвидации."
+                ],
+                badge: "алгоритм"
+            },
+            coop: {
+                emoji: "🤝",
+                title: "Наладить взаимодействие служб и надзорных органов",
+                content: [
+                    "Схема оповещения и связи между аварийными службами, администрацией и надзорными органами.",
+                    "Регламент обмена информацией и совместных действий.",
+                    "Порядок привлечения дополнительных сил (МЧС, пожарные, медицина).",
+                    "Учёт требований контролирующих органов и отчётность."
+                ],
+                badge: "координация"
+            },
+            ready: {
+                emoji: "⚙️",
+                title: "Обеспечить готовность сил, средств и регулярные учения",
+                content: [
+                    "Поддержание техники, оборудования и материалов в постоянной готовности.",
+                    "Проведение плановых учебных тревог и командно-штабных тренировок.",
+                    "Обучение персонала действиям в аварийных ситуациях.",
+                    "Анализ учений и корректировка плана по их результатам."
+                ],
+                badge: "тренировки"
+            },
+            harm: {
+                emoji: "🌿",
+                title: "Минимизировать вред людям и природе",
+                content: [
+                    "Приоритет защиты населения: оповещение, эвакуация, медпомощь.",
+                    "Сохранение водных биоресурсов, животных и растений.",
+                    "Снижение ущерба почвам, водоёмам и атмосферному воздуху.",
+                    "Ликвидация последствий и восстановление экосистем."
+                ],
+                badge: "эко-защита"
+            }
+        };
+
+        const buttons = document.querySelectorAll('.cat-btn');
+        const panelEmoji = document.getElementById('panelEmoji');
+        const panelTitle = document.getElementById('panelTitle');
+        const panelContent = document.getElementById('panelContent');
+        const buttonList = document.getElementById('buttonList');
+
+        let activeKey = null;
+
+        function showInfo(key) {
+            if (key === activeKey) return;
+            const item = data[key];
+            if (!item) return;
+
+            activeKey = key;
+
+            panelEmoji.textContent = item.emoji;
+            panelTitle.textContent = item.title;
+
+            const listItems = item.content.map(text => `<li>${text}</li>`).join('');
+            panelContent.innerHTML = `
+                <ul>${listItems}</ul>
+                <span class="badge">${item.badge}</span>
+            `;
+
+            // Перезапуск анимации появления
+            panelContent.style.animation = 'none';
+            void panelContent.offsetWidth;
+            panelContent.style.animation = 'fadeIn 0.28s ease';
+
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.key === key);
+            });
+        }
+
+        function resetInfo() {
+            activeKey = null;
+            panelEmoji.textContent = "📋";
+            panelTitle.textContent = "Наведите на кнопку слева";
+            panelContent.innerHTML = `
+                <p class="placeholder-text">
+                    Наведите курсор на любую категорию слева, чтобы увидеть, какие задачи решает План ЛРН в этом направлении.
+                </p>
+            `;
+            buttons.forEach(btn => btn.classList.remove('active'));
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => showInfo(btn.dataset.key));
+            btn.addEventListener('click', () => showInfo(btn.dataset.key));
+            btn.addEventListener('focus', () => showInfo(btn.dataset.key));
+        });
+
+        buttonList.addEventListener('mouseleave', resetInfo);
+
+        buttonList.addEventListener('focusout', (e) => {
+            if (!buttonList.contains(e.relatedTarget)) {
+                resetInfo();
+            }
+        });
+    })();
+</script>
+</body>
+</html>
