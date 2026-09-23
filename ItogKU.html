@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Интерактивное задание 4.1. Листалка</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* ===== КОНТЕЙНЕР 600×400 ===== */
+    .container {
+      width: 600px;
+      height: 400px;
+      background: #ffffff;
+      border: 1px solid #cfe0f2;
+      border-radius: 20px;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ===== ЗАГОЛОВОК ===== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0b3b6b;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: #2f6ea5;
+      background: #eaf2fb;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* ===== ПРОГРЕСС-БАР ===== */
+    .progress-bar-bg {
+      width: 100%;
+      height: 5px;
+      background: #e2ecf7;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2f6ea5, #0b3b6b);
+      border-radius: 10px;
+      transition: width 0.35s ease;
+    }
+
+    /* ===== ОБЛАСТЬ СЛАЙДА ===== */
+    #slideArea {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .slide-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .situation-badge {
+      display: inline-block;
+      background: #0b3b6b;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+      margin-bottom: 10px;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    .situation-text {
+      font-size: 14.5px;
+      color: #123a5e;
+      line-height: 1.45;
+      font-weight: 500;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ===== ВАРИАНТЫ ОТВЕТА ===== */
+    .answers {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #f2f8fe;
+      padding: 10px 12px;
+      border-radius: 30px;
+      border: 2px solid #b9d3ed;
+      transition: all 0.15s;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #123a5e;
+      user-select: none;
+      text-align: center;
+    }
+
+    .option:hover:not(.disabled) {
+      background: #e2effc;
+      border-color: #7fa9d6;
+    }
+
+    .option.selected {
+      border-color: #0b3b6b;
+      background: #dbeafc;
+    }
+
+    .option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #7fa9d6;
+      border-radius: 50%;
+      margin: 0;
+      cursor: pointer;
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .option input[type="radio"]:checked {
+      border-color: #0b3b6b;
+      background: #0b3b6b;
+      box-shadow: inset 0 0 0 2.5px #ffffff;
+    }
+
+    .option.disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* ===== ОБРАТНАЯ СВЯЗЬ ===== */
+    .feedback {
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      line-height: 1.4;
+      display: none;
+      animation: fadeIn 0.25s ease;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: #e6f5ec;
+      border-left: 4px solid #1f8b4c;
+      color: #144d2a;
+    }
+
+    .feedback.wrong {
+      background: #fdecec;
+      border-left: 4px solid #c0392b;
+      color: #6b1e1e;
+    }
+
+    .feedback-title {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feedback-explanation {
+      font-size: 12px;
+      opacity: 0.92;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== НАВИГАЦИЯ ===== */
+    .nav-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      background: #0b3b6b;
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: #092c50;
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .nav-btn.secondary {
+      background: #eaf2fb;
+      color: #0b3b6b;
+      border: 1px solid #b9d3ed;
+    }
+
+    .nav-btn.secondary:hover:not(:disabled) {
+      background: #dbeafc;
+    }
+
+    .nav-counter {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4b7092;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* ===== ФИНАЛЬНЫЙ ЭКРАН ===== */
+    .final-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .final-emoji {
+      font-size: 42px;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .final-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0b3b6b;
+      margin-bottom: 6px;
+    }
+
+    .final-score {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2f6ea5;
+      background: #eaf2fb;
+      padding: 6px 20px;
+      border-radius: 30px;
+      margin-bottom: 10px;
+    }
+
+    .final-summary {
+      font-size: 13px;
+      color: #4b7092;
+      margin-bottom: 16px;
+      line-height: 1.45;
+      max-width: 420px;
+    }
+
+    .restart-btn {
+      background: #0b3b6b;
+      color: #ffffff;
+      border: none;
+      padding: 9px 24px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .restart-btn:hover {
+      background: #092c50;
+    }
+
+    .restart-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="header">
+    <h1>⚖️ Удовлетворительно или нет?</h1>
+    <div class="progress-text" id="progressText">0 / 4</div>
+  </div>
+
+  <div class="progress-bar-bg">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div id="slideArea"></div>
+</div>
+
+<script>
+  (function() {
+    // ---------- данные ----------
+    const situations = [
+      {
+        id: 1,
+        text: 'Все мероприятия выполнены, но одно заняло на 20 минут больше времени, чем предусмотрено планом.',
+        correct: 'удовлетворительно',
+        explanation: 'Незначительное превышение времени (20 мин) при выполнении всех мероприятий не является основанием для неудовлетворительной оценки. Результаты учений признаются удовлетворительными.'
+      },
+      {
+        id: 2,
+        text: 'Одно мероприятие не выполнено, остальные — в срок.',
+        correct: 'неудовлетворительно',
+        explanation: 'Невыполнение хотя бы одного мероприятия из плана учений влечёт неудовлетворительную оценку, даже если остальные выполнены в срок.'
+      },
+      {
+        id: 3,
+        text: 'Техническое средство сломалось, но его успели заменить до окончания мероприятия, и работы по ЛРН провели.',
+        correct: 'удовлетворительно',
+        explanation: 'Замена вышедшего из строя технического средства и успешное проведение работ по ЛРН позволяет признать результаты учений удовлетворительными.'
+      },
+      {
+        id: 4,
+        text: 'Состав сил и средств фактически меньше, чем указано в плане КУ.',
+        correct: 'неудовлетворительно',
+        explanation: 'Фактический состав сил и средств меньше запланированного в плане КУ — это существенное отклонение, результаты учений признаются неудовлетворительными.'
+      }
+    ];
+
+    // ---------- состояние ----------
+    let currentIndex = 0;
+    let userAnswers = new Array(4).fill(null);
+    let answered = new Array(4).fill(false);
+    let finished = false;
+
+    // DOM
+    const slideArea = document.getElementById('slideArea');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    // ---------- функции ----------
+    function updateProgress() {
+      const answeredCount = userAnswers.filter(a => a !== null).length;
+      progressFill.style.width = ((answeredCount / situations.length) * 100) + '%';
+      progressText.textContent = `${answeredCount} / ${situations.length}`;
+    }
+
+    function renderSlide() {
+      if (finished) {
+        renderFinal();
+        return;
+      }
+
+      const s = situations[currentIndex];
+      const userAnswer = userAnswers[currentIndex];
+      const hasAnswered = answered[currentIndex];
+
+      let html = `
+        <div class="slide-card">
+          <div class="situation-badge">Ситуация ${s.id}</div>
+          <div class="situation-text">${s.text}</div>
+          <div class="answers" id="answersBlock">
+      `;
+
+      const options = [
+        { value: 'удовлетворительно', label: '✅ Удовлетворительно' },
+        { value: 'неудовлетворительно', label: '❌ Неудовлетворительно' }
+      ];
+
+      options.forEach(opt => {
+        const checked = userAnswer === opt.value ? 'checked' : '';
+        const selectedClass = userAnswer === opt.value ? 'selected' : '';
+        const disabledClass = hasAnswered ? 'disabled' : '';
+        html += `
+          <label class="option ${selectedClass} ${disabledClass}" data-value="${opt.value}">
+            <input type="radio" name="situation-${s.id}" value="${opt.value}" ${checked} ${hasAnswered ? 'disabled' : ''}>
+            <span>${opt.label}</span>
+          </label>
+        `;
+      });
+
+      html += `</div>`;
+
+      // обратная связь
+      if (hasAnswered) {
+        const isCorrect = userAnswer === s.correct;
+        const feedbackClass = isCorrect ? 'correct' : 'wrong';
+        const icon = isCorrect ? '✅' : '❌';
+        const title = isCorrect ? 'Верно!' : 'Неверно';
+        html += `
+          <div class="feedback ${feedbackClass} show">
+            <div class="feedback-title"><span>${icon}</span> ${title}</div>
+            <div class="feedback-explanation">${s.explanation}</div>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+
+      // навигация
+      const prevDisabled = currentIndex === 0 ? 'disabled' : '';
+      const nextDisabled = !hasAnswered ? 'disabled' : '';
+      const nextLabel = (currentIndex === situations.length - 1 && hasAnswered)
+        ? '🏁 Завершить'
+        : 'Далее →';
+
+      html += `
+        <div class="nav-panel">
+          <button class="nav-btn secondary" id="prevBtn" ${prevDisabled}>← Назад</button>
+          <span class="nav-counter">Ситуация ${s.id} из ${situations.length}</span>
+          <button class="nav-btn" id="nextBtn" ${nextDisabled}>${nextLabel}</button>
+        </div>
+      `;
+
+      slideArea.innerHTML = html;
+
+      // обработчики
+      const optionLabels = slideArea.querySelectorAll('.option');
+      optionLabels.forEach(label => {
+        label.addEventListener('click', function() {
+          if (hasAnswered) return;
+          const input = this.querySelector('input[type="radio"]');
+          if (input && !input.disabled) {
+            input.checked = true;
+            optionLabels.forEach(l => l.classList.remove('selected'));
+            this.classList.add('selected');
+            userAnswers[currentIndex] = this.dataset.value;
+            answered[currentIndex] = true;
+            updateProgress();
+            renderSlide();
+          }
+        });
+      });
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (currentIndex > 0) {
+            currentIndex--;
+            renderSlide();
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (!answered[currentIndex]) return;
+          if (currentIndex === situations.length - 1) {
+            if (userAnswers.every(a => a !== null)) {
+              finished = true;
+              renderFinal();
+            }
+          } else {
+            currentIndex++;
+            renderSlide();
+          }
+        });
+      }
+    }
+
+    function renderFinal() {
+      const correctCount = situations.reduce((acc, s, idx) =>
+        acc + (userAnswers[idx] === s.correct ? 1 : 0), 0);
+
+      const total = situations.length;
+      let emoji, title, summary;
+
+      if (correctCount === total) {
+        emoji = '🏆';
+        title = 'Отлично!';
+        summary = 'Вы верно оценили все ситуации. Вы отлично разбираетесь в критериях оценки учений.';
+      } else if (correctCount >= 3) {
+        emoji = '👍';
+        title = 'Хороший результат!';
+        summary = 'Почти всё верно. Ознакомьтесь с пояснениями, чтобы запомнить нюансы.';
+      } else if (correctCount >= 2) {
+        emoji = '📘';
+        title = 'Есть над чем поработать';
+        summary = 'Половина ответов верна. Рекомендуем повторить критерии удовлетворительной оценки.';
+      } else {
+        emoji = '📌';
+        title = 'Попробуйте ещё раз';
+        summary = 'Пока много ошибок. Внимательно изучите пояснения и пройдите задание снова.';
+      }
+
+      slideArea.innerHTML = `
+        <div class="final-screen">
+          <div class="final-emoji">${emoji}</div>
+          <div class="final-title">${title}</div>
+          <div class="final-score">${correctCount} из ${total} правильных ответов</div>
+          <div class="final-summary">${summary}</div>
+          <button class="restart-btn" id="restartBtn">🔄 Пройти заново</button>
+        </div>
+      `;
+
+      progressFill.style.width = '100%';
+      progressText.textContent = `${total} / ${total}`;
+
+      document.getElementById('restartBtn').addEventListener('click', resetAll);
+    }
+
+    function resetAll() {
+      currentIndex = 0;
+      userAnswers = new Array(situations.length).fill(null);
+      answered = new Array(situations.length).fill(false);
+      finished = false;
+      updateProgress();
+      renderSlide();
+    }
+
+    // ---------- старт ----------
+    updateProgress();
+    renderSlide();
+  })();
+</script>
+</body>
+</html>
