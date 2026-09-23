@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивное задание 1.1: Соберите план КУ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: #0a2540;
+        }
+
+        /* Основной контейнер 700x700, без тени */
+        .task-container {
+            width: 700px;
+            height: 700px;
+            background: linear-gradient(160deg, #ffffff 0%, #f0f8ff 100%);
+            border-radius: 32px;
+            padding: 18px 20px 20px;
+            border: 1px solid #b8d4ec;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Заголовок */
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #0a3a6b;
+            letter-spacing: -0.01em;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .subhead {
+            font-size: 0.78rem;
+            color: #1c4a75;
+            margin-bottom: 10px;
+            line-height: 1.35;
+            background: #e3f0fb;
+            border-left: 4px solid #2c7ab8;
+            border-radius: 0 10px 10px 0;
+            padding: 6px 10px;
+            flex-shrink: 0;
+        }
+
+        /* Пул карточек */
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            align-content: flex-start;
+            padding: 8px;
+            min-height: 110px;
+            max-height: 110px;
+            background: #eaf4fd;
+            border-radius: 18px;
+            border: 2px dashed #8ab8dd;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            scrollbar-width: thin;
+            scrollbar-color: #8ab8dd #eaf4fd;
+        }
+
+        .cards-pool::-webkit-scrollbar {
+            width: 6px;
+        }
+        .cards-pool::-webkit-scrollbar-thumb {
+            background: #8ab8dd;
+            border-radius: 10px;
+        }
+
+        /* Карточка */
+        .card {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f8ff 100%);
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #0a2a4a;
+            box-shadow: 0 3px 8px -3px rgba(10, 60, 110, 0.28);
+            border: 1px solid #ffffff;
+            border-left: 5px solid #2c7ab8;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.13s ease, box-shadow 0.13s ease;
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            white-space: normal;
+            line-height: 1.25;
+            letter-spacing: 0.01em;
+        }
+
+        .card:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+
+        .card.dragging {
+            opacity: 0.45;
+            transform: scale(0.96);
+            box-shadow: 0 0 0 2px #2c7ab8;
+        }
+
+        /* Зоны сброса */
+        .drop-zones {
+            display: flex;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .zone {
+            flex: 1;
+            background: #f5faff;
+            border-radius: 18px;
+            padding: 8px 8px 10px;
+            border: 2px solid #c5ddf1;
+            transition: border-color 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .zone.required {
+            border-top: 8px solid #1565a0;
+        }
+
+        .zone.extra {
+            border-top: 8px solid #4a90c9;
+        }
+
+        .zone.drag-over {
+            background: #d6ecff;
+            border-color: #2c7ab8;
+            border-style: dashed;
+        }
+
+        .zone-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .zone.required .zone-header {
+            color: #0a3a6b;
+        }
+
+        .zone.extra .zone-header {
+            color: #2c6ea0;
+        }
+
+        .zone-header span {
+            font-size: 1rem;
+        }
+
+        .zone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            padding-right: 3px;
+            scrollbar-width: thin;
+            scrollbar-color: #8ab8dd #f5faff;
+        }
+
+        .zone-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .zone-list::-webkit-scrollbar-thumb {
+            background: #8ab8dd;
+            border-radius: 10px;
+        }
+
+        .zone-list .card {
+            cursor: default;
+            width: 100%;
+            justify-content: space-between;
+            border-left-color: #2c7ab8;
+            background: #eaf4fd;
+            font-size: 0.7rem;
+            padding: 6px 10px 6px 12px;
+        }
+
+        .zone.required .zone-list .card {
+            border-left-color: #1565a0;
+            background: #e1eefb;
+        }
+
+        .zone.extra .zone-list .card {
+            border-left-color: #4a90c9;
+            background: #e8f2fb;
+        }
+
+        .card .remove-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            line-height: 1;
+            color: #5b8ab5;
+            cursor: pointer;
+            margin-left: 8px;
+            padding: 0 4px;
+            transition: color 0.1s;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .card .remove-btn:hover {
+            color: #1565a0;
+            background: #ffffffcc;
+        }
+
+        /* Кнопки */
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            padding: 8px 22px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid #ffffff70;
+        }
+
+        .btn.reset {
+            background: #7ba8cc;
+            color: #ffffff;
+        }
+
+        .btn.reset:hover {
+            background: #5b8ab5;
+            transform: translateY(-1px);
+        }
+
+        .btn.check {
+            background: #1565a0;
+            color: #ffffff;
+        }
+
+        .btn.check:hover {
+            background: #0a3a6b;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Сообщение результата */
+        .result-message {
+            text-align: center;
+            padding: 8px 14px;
+            border-radius: 14px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            background: #eaf4fd;
+            color: #14406b;
+            border: 1px solid #c5ddf1;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            line-height: 1.35;
+            transition: all 0.25s;
+            margin-bottom: 6px;
+        }
+
+        .result-message.success {
+            background: #d6ecff;
+            color: #0a3a6b;
+            border-left: 8px solid #1565a0;
+            font-weight: 700;
+        }
+
+        .result-message.error {
+            background: #e1eefb;
+            color: #14406b;
+            border-left: 8px solid #4a90c9;
+        }
+
+        /* Нижняя подпись */
+        .footer-note {
+            font-size: 0.65rem;
+            color: #3a6a95;
+            text-align: center;
+            font-style: italic;
+            border-top: 1px solid #c5ddf1;
+            padding-top: 6px;
+            flex-shrink: 0;
+            line-height: 1.3;
+        }
+
+        /* Плейсхолдер пула */
+        .empty-pool {
+            color: #8ab8dd;
+            font-style: italic;
+            font-size: 0.72rem;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="task-container" id="app">
+    <h1>
+        <span>🛢️</span> Соберите план КУ
+    </h1>
+    <div class="subhead">
+        Вы готовите план КУ для нефтебазы. Выберите только обязательные пункты — без них план не примут.
+    </div>
+
+    <!-- Пул карточек -->
+    <div class="cards-pool" id="cardsPool"></div>
+
+    <!-- Зоны сброса -->
+    <div class="drop-zones">
+        <div class="zone required" id="requiredZone" data-zone="required">
+            <div class="zone-header"><span>✅</span> Обязательные</div>
+            <div class="zone-list" id="requiredList"></div>
+        </div>
+        <div class="zone extra" id="extraZone" data-zone="extra">
+            <div class="zone-header"><span>❌</span> Лишние</div>
+            <div class="zone-list" id="extraList"></div>
+        </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="actions">
+        <button class="btn reset" id="resetBtn">⟲ Сбросить</button>
+        <button class="btn check" id="checkBtn">✓ Проверить план</button>
+    </div>
+
+    <!-- Результат -->
+    <div class="result-message" id="resultMessage">
+        Перетащите карточки в нужные зоны
+    </div>
+
+    <div class="footer-note">
+        ⚡ Если план собран верно — переходите к следующему шагу: подготовка к проведению учений (урок 2).
+    </div>
+</div>
+
+<script>
+    (function() {
+        const CARDS_DATA = [
+            { text: 'Резервная дата проведения учений', isRequired: true },
+            { text: 'Список сотрудников, которые пойдут в отпуск в следующем году', isRequired: false },
+            { text: 'Схема оповещения и взаимодействия', isRequired: true },
+            { text: 'Объем и площадь разлива', isRequired: true },
+            { text: 'Коммерческая тайна подрядчика', isRequired: false },
+            { text: 'Состав сил и средств с количеством техники', isRequired: true },
+            { text: 'План закупок на квартал', isRequired: false },
+            { text: 'Этапы учений и их продолжительность', isRequired: true }
+        ];
+
+        let cards = [];
+        let dragCardId = null;
+
+        const poolEl = document.getElementById('cardsPool');
+        const requiredListEl = document.getElementById('requiredList');
+        const extraListEl = document.getElementById('extraList');
+        const requiredZoneEl = document.getElementById('requiredZone');
+        const extraZoneEl = document.getElementById('extraZone');
+        const resetBtn = document.getElementById('resetBtn');
+        const checkBtn = document.getElementById('checkBtn');
+        const resultMessage = document.getElementById('resultMessage');
+
+        function initCards() {
+            cards = CARDS_DATA.map((data, index) => ({
+                id: `card-${index}-${Date.now()}-${Math.random()}`,
+                text: data.text,
+                isRequired: data.isRequired,
+                zone: 'pool'
+            }));
+        }
+
+        function render() {
+            poolEl.innerHTML = '';
+            requiredListEl.innerHTML = '';
+            extraListEl.innerHTML = '';
+
+            const poolCards = cards.filter(c => c.zone === 'pool');
+            const requiredCards = cards.filter(c => c.zone === 'required');
+            const extraCards = cards.filter(c => c.zone === 'extra');
+
+            if (poolCards.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-pool';
+                emptyMsg.textContent = 'Все карточки распределены';
+                poolEl.appendChild(emptyMsg);
+            } else {
+                poolCards.forEach(card => {
+                    poolEl.appendChild(createCardElement(card, false));
+                });
+            }
+
+            requiredCards.forEach(card => {
+                requiredListEl.appendChild(createCardElement(card, true));
+            });
+
+            extraCards.forEach(card => {
+                extraListEl.appendChild(createCardElement(card, true));
+            });
+        }
+
+        function createCardElement(card, withRemove = false) {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.dataset.cardId = card.id;
+            cardEl.draggable = (card.zone === 'pool');
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = card.text;
+            cardEl.appendChild(textSpan);
+
+            if (withRemove) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '✕';
+                removeBtn.title = 'Вернуть в пул';
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    moveCardToZone(card.id, 'pool');
+                });
+                cardEl.appendChild(removeBtn);
+            }
+
+            if (card.zone === 'pool') {
+                cardEl.addEventListener('dragstart', handleDragStart);
+                cardEl.addEventListener('dragend', handleDragEnd);
+            }
+
+            return cardEl;
+        }
+
+        function handleDragStart(e) {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl) return;
+            const cardId = cardEl.dataset.cardId;
+            const card = cards.find(c => c.id === cardId);
+            if (!card || card.zone !== 'pool') {
+                e.preventDefault();
+                return;
+            }
+
+            dragCardId = cardId;
+            e.dataTransfer.setData('text/plain', cardId);
+            e.dataTransfer.effectAllowed = 'move';
+            cardEl.classList.add('dragging');
+            setTimeout(() => cardEl.style.opacity = '0.5', 0);
+        }
+
+        function handleDragEnd(e) {
+            const cardEl = e.target.closest('.card');
+            if (cardEl) {
+                cardEl.classList.remove('dragging');
+                cardEl.style.opacity = '';
+            }
+            requiredZoneEl.classList.remove('drag-over');
+            extraZoneEl.classList.remove('drag-over');
+            dragCardId = null;
+        }
+
+        function setupDropZones() {
+            [requiredZoneEl, extraZoneEl].forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', (e) => {
+                    const rect = zone.getBoundingClientRect();
+                    const x = e.clientX, y = e.clientY;
+                    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+                        zone.classList.remove('drag-over');
+                    }
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const targetZone = zone.dataset.zone;
+
+                    let cardId = e.dataTransfer.getData('text/plain');
+                    if (!cardId && dragCardId) cardId = dragCardId;
+                    if (!cardId) return;
+
+                    const card = cards.find(c => c.id === cardId);
+                    if (!card) return;
+                    if (card.zone !== 'pool') return;
+
+                    moveCardToZone(cardId, targetZone);
+                });
+            });
+        }
+
+        function moveCardToZone(cardId, targetZone) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+
+            if (targetZone === 'pool') {
+                card.zone = 'pool';
+            } else if (targetZone === 'required' || targetZone === 'extra') {
+                card.zone = targetZone;
+            } else {
+                return;
+            }
+
+            resultMessage.textContent = 'Нажмите «Проверить план», чтобы увидеть результат';
+            resultMessage.className = 'result-message';
+
+            render();
+        }
+
+        function checkPlan() {
+            const poolCards = cards.filter(c => c.zone === 'pool');
+            if (poolCards.length > 0) {
+                resultMessage.textContent = `⚠️ Остались нераспределенные карточки (${poolCards.length} шт.). Перетащите их в одну из зон.`;
+                resultMessage.className = 'result-message error';
+                return;
+            }
+
+            let allCorrect = true;
+            let wrongRequired = [];
+            let wrongExtra = [];
+
+            cards.forEach(card => {
+                if (card.isRequired && card.zone !== 'required') {
+                    allCorrect = false;
+                    wrongRequired.push(card.text);
+                }
+                if (!card.isRequired && card.zone !== 'extra') {
+                    allCorrect = false;
+                    wrongExtra.push(card.text);
+                }
+            });
+
+            if (allCorrect) {
+                resultMessage.textContent = '✅ План собран верно! Все обязательные пункты на месте, лишние отсеяны. Можно переходить к следующему шагу.';
+                resultMessage.className = 'result-message success';
+            } else {
+                let errorMsg = '❌ План собран неверно. ';
+                if (wrongRequired.length > 0) {
+                    errorMsg += 'Обязательные пункты, которые нужно переместить в «Обязательные»: ' + wrongRequired.join('; ') + '. ';
+                }
+                if (wrongExtra.length > 0) {
+                    errorMsg += 'Лишние пункты, которые нужно убрать в «Лишние»: ' + wrongExtra.join('; ') + '.';
+                }
+                resultMessage.textContent = errorMsg;
+                resultMessage.className = 'result-message error';
+            }
+        }
+
+        function resetGame() {
+            initCards();
+            render();
+            resultMessage.textContent = 'Перетащите карточки в нужные зоны';
+            resultMessage.className = 'result-message';
+            requiredZoneEl.classList.remove('drag-over');
+            extraZoneEl.classList.remove('drag-over');
+        }
+
+        function init() {
+            initCards();
+            setupDropZones();
+            render();
+
+            resetBtn.addEventListener('click', resetGame);
+            checkBtn.addEventListener('click', checkPlan);
+
+            document.addEventListener('dragover', (e) => e.preventDefault());
+            document.addEventListener('drop', (e) => e.preventDefault());
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>
+</body>
+</html>
